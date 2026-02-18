@@ -1,1138 +1,595 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Performance Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --surface2: #1a1a24;
-      --border: #2a2a3a;
-      --accent: #c8f04a;
-      --accent2: #4af0c8;
-      --accent3: #f04ac8;
-      --text: #e8e8f0;
-      --text-dim: #7a7a9a;
-      --tiktok: #ff2d55;
-      --instagram: #e1306c;
-      --youtube: #ff0000;
-      --radius: 10px;
-      --mono: 'DM Mono', monospace;
-      --display: 'Syne', sans-serif;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* === AUTH SCREEN === */
-    #auth-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg);
-      position: relative;
-    }
-
-    #auth-screen::before {
-      content: '';
-      position: fixed;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(200,240,74,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .auth-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 48px 40px;
-      width: 100%;
-      max-width: 400px;
-      margin: 20px;
-    }
-
-    .auth-logo {
-      font-family: var(--display);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-
-    .auth-title {
-      font-family: var(--display);
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 32px;
-      line-height: 1.2;
-    }
-
-    .form-group { margin-bottom: 20px; }
-
-    .form-label {
-      display: block;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-    }
-
-    .form-input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 14px;
-      transition: border-color 0.2s;
-      outline: none;
-    }
-
-    .form-input:focus { border-color: var(--accent); }
-
-    .btn-primary {
-      width: 100%;
-      background: var(--accent);
-      color: #0a0a0f;
-      border: none;
-      border-radius: var(--radius);
-      padding: 14px;
-      font-family: var(--display);
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      margin-top: 8px;
-    }
-
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:active { transform: scale(0.98); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .auth-error {
-      background: rgba(240,74,200,0.1);
-      border: 1px solid rgba(240,74,200,0.3);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--accent3);
-      margin-top: 16px;
-      display: none;
-    }
-
-    /* === MAIN DASHBOARD === */
-    #dashboard { display: none; }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,10,15,0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-    }
-
-    .topbar-brand {
-      font-family: var(--display);
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 14px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-logout:hover {
-      border-color: var(--accent3);
-      color: var(--accent3);
-    }
-
-    .main-content {
-      padding: 24px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* === STATS SUMMARY === */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    @media (max-width: 600px) {
-      .stats-row { grid-template-columns: 1fr; }
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-    }
-
-    .stat-platform {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-    }
-
-    .stat-value {
-      font-family: var(--display);
-      font-size: 24px;
-      font-weight: 800;
-    }
-
-    .stat-card.tiktok .stat-value { color: var(--tiktok); }
-    .stat-card.instagram .stat-value { color: var(--instagram); }
-    .stat-card.youtube .stat-value { color: var(--youtube); }
-
-    /* === TOOLBAR === */
-    .toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .toolbar-title {
-      font-family: var(--display);
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .btn-add {
-      background: var(--accent);
-      color: #0a0a0f;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-family: var(--display);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.2s;
-    }
-
-    .btn-add:hover { opacity: 0.85; }
-
-    /* === TABLE === */
-    .table-wrapper {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 900px;
-    }
-
-    thead {
-      background: var(--surface2);
-    }
-
-    th {
-      padding: 14px 16px;
-      text-align: left;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      font-weight: 500;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(42,42,58,0.5);
-      font-size: 13px;
-      vertical-align: middle;
-    }
-
-    tr:last-child td { border-bottom: none; }
-
-    tr:hover td { background: rgba(255,255,255,0.02); }
-
-    /* === VIDEO CODE BUTTON === */
-    .code-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 10px;
-      color: var(--accent2);
-      font-family: var(--mono);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .code-btn:hover {
-      border-color: var(--accent2);
-      background: rgba(74,240,200,0.08);
-    }
-
-    /* === VIEWS BADGE === */
-    .views-cell {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .view-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-    }
-
-    .view-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .view-dot.tiktok { background: var(--tiktok); }
-    .view-dot.instagram { background: var(--instagram); }
-    .view-dot.youtube { background: var(--youtube); }
-
-    /* === ACTION BUTTONS === */
-    .action-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 10px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-      font-size: 11px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .action-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .action-btn.del:hover { border-color: var(--accent3); color: var(--accent3); }
-
-    .action-cell { display: flex; gap: 6px; }
-
-    /* === EMPTY STATE === */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-dim);
-    }
-
-    .empty-state .icon { font-size: 32px; margin-bottom: 12px; }
-    .empty-state p { font-size: 13px; }
-
-    /* === MODAL === */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 520px;
-      max-height: 90vh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .modal-header {
-      padding: 24px 24px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-title {
-      font-family: var(--display);
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-      line-height: 1;
-    }
-
-    .modal-body { padding: 24px; }
-
-    .modal-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 480px) {
-      .modal-grid { grid-template-columns: 1fr; }
-    }
-
-    .modal-grid .full { grid-column: 1 / -1; }
-
-    .modal-footer {
-      padding: 0 24px 24px;
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-
-    .btn-cancel {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 20px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-cancel:hover { border-color: var(--text-dim); color: var(--text); }
-
-    .btn-save {
-      background: var(--accent);
-      color: #0a0a0f;
-      border: none;
-      border-radius: var(--radius);
-      padding: 12px 24px;
-      font-family: var(--display);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .btn-save:hover { opacity: 0.85; }
-    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* === TIME PICKER MODAL === */
-    .time-picker-modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 320px;
-      padding: 24px;
-    }
-
-    .time-picker-title {
-      font-family: var(--display);
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .time-display {
-      font-family: var(--display);
-      font-size: 48px;
-      font-weight: 800;
-      text-align: center;
-      color: var(--accent);
-      margin-bottom: 24px;
-      letter-spacing: 0.05em;
-    }
-
-    .time-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .time-col label {
-      display: block;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .time-spin {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .spin-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      width: 40px; height: 36px;
-      color: var(--text);
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .spin-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    .spin-value {
-      font-family: var(--display);
-      font-size: 28px;
-      font-weight: 700;
-      min-width: 50px;
-      text-align: center;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 6px;
-      color: var(--text);
-    }
-
-    /* === LINKS POPUP === */
-    .links-popup {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 340px;
-      padding: 24px;
-    }
-
-    .links-popup-title {
-      font-family: var(--display);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-dim);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-size: 10px;
-    }
-
-    .links-popup-code {
-      font-family: var(--display);
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--accent2);
-      margin-bottom: 20px;
-    }
-
-    .link-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      margin-bottom: 10px;
-      text-decoration: none;
-      color: var(--text);
-      transition: all 0.2s;
-      font-size: 13px;
-    }
-
-    .link-item:last-child { margin-bottom: 0; }
-    .link-item:hover { border-color: var(--border); transform: translateX(4px); }
-    .link-item.tiktok:hover { border-color: var(--tiktok); background: rgba(255,45,85,0.08); }
-    .link-item.instagram:hover { border-color: var(--instagram); background: rgba(225,48,108,0.08); }
-    .link-item.youtube:hover { border-color: var(--youtube); background: rgba(255,0,0,0.08); }
-
-    .link-icon { font-size: 20px; flex-shrink: 0; }
-
-    .link-info { flex: 1; }
-    .link-platform { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-    .link-url { font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-
-    .link-arrow { color: var(--text-dim); font-size: 14px; }
-
-    .no-link {
-      opacity: 0.4;
-      pointer-events: none;
-      cursor: not-allowed;
-    }
-
-    /* === LOADING === */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-dim);
-      font-size: 13px;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 20px;
-      font-size: 13px;
-      z-index: 999;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .toast.success { border-color: var(--accent); color: var(--accent); }
-    .toast.error { border-color: var(--accent3); color: var(--accent3); }
-
-    /* Input no-spinner for number */
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    input[type=number] { -moz-appearance: textfield; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Content Dashboard Toko Mas Lia</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --primary:#c2185b;--primary-l:#e91e8c;--secondary:#9c27b0;--tertiary:#e040fb;
+  --surface:#fff8fc;--surface2:#fce4ec;--surface3:#f3e5f5;
+  --on-surface:#2d1b2e;--on-var:#7b5e7b;
+  --outline:#e8c8d8;--outline-v:#f5d0e8;
+  --bg:#fdf4f9;--white:#ffffff;
+  --tiktok:#ff2d55;--ig:#c2185b;--yt:#e53935;
+  --sh-sm:0 1px 3px rgba(194,24,91,.08),0 1px 2px rgba(156,39,176,.06);
+  --sh-md:0 4px 16px rgba(194,24,91,.12),0 2px 6px rgba(156,39,176,.08);
+  --sh-lg:0 8px 32px rgba(194,24,91,.16),0 4px 12px rgba(156,39,176,.10);
+  --r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;
+  --body:'Quicksand',sans-serif;--disp:'Nunito',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--on-surface);font-family:var(--body);min-height:100vh;font-size:14px}
+
+/* AUTH */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fce4ec 0%,#f3e5f5 40%,#ede7f6 100%);padding:20px;position:relative;overflow:hidden}
+#auth-screen::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(224,64,251,.15) 0%,transparent 70%);pointer-events:none}
+#auth-screen::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(194,24,91,.12) 0%,transparent 70%);pointer-events:none}
+.auth-card{background:var(--white);border-radius:var(--r-xl);padding:48px 40px;width:100%;max-width:420px;box-shadow:var(--sh-lg);position:relative;z-index:1}
+@media(max-width:480px){.auth-card{padding:36px 24px}}
+.auth-deco{width:64px;height:64px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px;box-shadow:0 4px 16px rgba(194,24,91,.3)}
+.auth-title{font-family:var(--disp);font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--on-var);margin-bottom:28px}
+.tabs{display:flex;background:var(--surface2);border-radius:var(--r-md);padding:4px;margin-bottom:24px;gap:4px}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:var(--r-sm);background:transparent;font-family:var(--body);font-size:13px;font-weight:700;color:var(--on-var);cursor:pointer;transition:all .2s}
+.tab-btn.active{background:var(--white);color:var(--primary);box-shadow:var(--sh-sm)}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--on-var);margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
+.input-wrap{position:relative}
+.form-input{width:100%;background:var(--surface);border:2px solid var(--outline);border-radius:var(--r-md);padding:13px 16px;color:var(--on-surface);font-family:var(--body);font-size:14px;font-weight:600;transition:border-color .2s,box-shadow .2s;outline:none}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(194,24,91,.1)}
+.form-input.pi{padding-right:48px}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--on-var);font-size:18px;padding:4px;line-height:1;transition:color .2s}
+.eye-btn:hover{color:var(--primary)}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:var(--r-md);padding:16px;font-family:var(--disp);font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(194,24,91,.3);letter-spacing:.03em;margin-top:4px}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(194,24,91,.4);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.auth-msg{border-radius:var(--r-md);padding:12px 16px;font-size:13px;font-weight:600;margin-top:14px;display:none}
+.auth-err{background:#fce4ec;border:2px solid #f48fb1;color:var(--primary)}
+.auth-ok{background:#e8f5e9;border:2px solid #a5d6a7;color:#2e7d32}
+
+/* TOPBAR */
+#dashboard{display:none}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(253,244,249,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--outline);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px;box-shadow:var(--sh-sm)}
+.t-brand{display:flex;align-items:center;gap:10px}
+.t-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.t-name{font-family:var(--disp);font-size:16px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.t-right{display:flex;align-items:center;gap:10px}
+.u-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:40px;padding:6px 14px 6px 6px;font-size:12px;font-weight:700;color:var(--on-var)}
+.u-av{width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800}
+.btn-out{background:var(--surface2);border:none;border-radius:var(--r-sm);padding:8px 16px;color:var(--primary);font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-out:hover{background:var(--surface3)}
+
+/* MAIN */
+.main{padding:20px;max-width:1400px;margin:0 auto}
+.sec-lbl{font-family:var(--disp);font-size:13px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;margin-top:24px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px}
+@media(max-width:640px){.stats-row{grid-template-columns:1fr}}
+.s-card{background:var(--white);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm);border:1px solid var(--outline-v);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.s-card:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
+.s-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.s-card.tt::before{background:linear-gradient(90deg,#ff2d55,#ff6b8a)}
+.s-card.ig::before{background:linear-gradient(90deg,#c2185b,#e91e8c)}
+.s-card.yt::before{background:linear-gradient(90deg,#e53935,#ef9a9a)}
+.s-icon{font-size:24px;margin-bottom:8px}
+.s-plat{font-size:11px;font-weight:700;color:var(--on-var);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.s-val{font-family:var(--disp);font-size:28px;font-weight:900}
+.s-card.tt .s-val{color:var(--tiktok)}.s-card.ig .s-val{color:var(--ig)}.s-card.yt .s-val{color:var(--yt)}
+.s-sub{font-size:11px;color:var(--on-var);margin-top:4px}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px}
+.c-full{grid-column:1/-1}
+@media(max-width:768px){.charts-grid{grid-template-columns:1fr}}
+.c-card{background:var(--white);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm);border:1px solid var(--outline-v)}
+.c-title{font-family:var(--disp);font-size:14px;font-weight:800;color:var(--on-surface);margin-bottom:4px}
+.c-sub{font-size:11px;color:var(--on-var);margin-bottom:16px}
+.c-wrap{position:relative;height:220px}.c-wrap.tall{height:280px}
+
+/* TABLE */
+.tbl-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-sm);border:1px solid var(--outline-v);overflow:hidden}
+.tbl-hdr{padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--outline-v)}
+.tbl-ttl{font-family:var(--disp);font-size:16px;font-weight:800;color:var(--on-surface)}
+.btn-add{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:var(--r-md);padding:12px 20px;font-family:var(--disp);font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(194,24,91,.25);transition:all .2s}
+.btn-add:hover{box-shadow:0 6px 18px rgba(194,24,91,.35);transform:translateY(-1px)}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:780px}
+thead{background:var(--surface2)}
+th{padding:14px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;border-bottom:1px solid var(--outline)}
+td{padding:14px 16px;border-bottom:1px solid var(--outline-v);font-size:13px;font-weight:600;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface)}
+.badge-no{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--surface2);border-radius:8px;font-size:12px;font-weight:800;color:var(--primary)}
+.chip-date{background:var(--surface2);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--on-surface);white-space:nowrap}
+.chip-time{background:linear-gradient(135deg,#fce4ec,#f3e5f5);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800;color:var(--primary);white-space:nowrap}
+.code-btn{background:linear-gradient(135deg,#f3e5f5,#ede7f6);border:1.5px solid var(--outline);border-radius:var(--r-sm);padding:6px 12px;color:var(--secondary);font-family:var(--disp);font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap}
+.code-btn:hover{background:linear-gradient(135deg,var(--secondary),var(--tertiary));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(156,39,176,.3);transform:scale(1.04)}
+.v-cell{display:flex;flex-direction:column;gap:3px}
+.v-row{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+.v-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.v-dot.tt{background:var(--tiktok)}.v-dot.ig{background:var(--ig)}.v-dot.yt{background:var(--yt)}
+.act-cell{display:flex;gap:6px}
+.btn-edit{background:var(--surface3);border:none;border-radius:var(--r-sm);padding:7px 12px;color:var(--secondary);font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-edit:hover{background:var(--secondary);color:#fff}
+.btn-del{background:#fce4ec;border:none;border-radius:var(--r-sm);padding:7px 12px;color:var(--tiktok);font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-del:hover{background:var(--tiktok);color:#fff}
+.empty-st{text-align:center;padding:60px 20px;color:var(--on-var)}
+.empty-ic{font-size:48px;margin-bottom:12px}
+.empty-tx{font-size:14px;font-weight:600}
+
+/* OVERLAY & MODAL */
+.overlay{position:fixed;inset:0;background:rgba(45,27,46,.5);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r-xl);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:var(--sh-lg)}
+.m-hdr{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.m-ttl{font-family:var(--disp);font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.m-x{background:var(--surface2);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--on-var);font-size:16px;cursor:pointer;transition:all .2s}
+.m-x:hover{background:var(--surface3);color:var(--primary)}
+.m-body{padding:20px 24px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:480px){.g2{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.m-ftr{padding:0 24px 24px;display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{background:var(--surface2);border:none;border-radius:var(--r-md);padding:12px 20px;color:var(--on-var);font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{background:var(--surface3)}
+.btn-save{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:var(--r-md);padding:12px 24px;font-family:var(--disp);font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(194,24,91,.25);transition:all .2s}
+.btn-save:hover{box-shadow:0 6px 18px rgba(194,24,91,.35)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* TIME PICKER */
+.tp-box{background:var(--white);border-radius:var(--r-xl);width:100%;max-width:300px;padding:28px;box-shadow:var(--sh-lg)}
+.tp-ttl{font-family:var(--disp);font-size:16px;font-weight:900;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tp-disp{font-family:var(--disp);font-size:52px;font-weight:900;text-align:center;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px;letter-spacing:.04em}
+.tp-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.tp-col-lbl{font-size:11px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:8px}
+.spin{display:flex;flex-direction:column;align-items:center;gap:8px}
+.spin-btn{width:44px;height:40px;background:var(--surface2);border:2px solid var(--outline);border-radius:var(--r-sm);color:var(--primary);font-size:18px;font-weight:800;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.spin-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.spin-val{font-family:var(--disp);font-size:28px;font-weight:900;width:56px;text-align:center;background:var(--surface2);border:2px solid var(--outline);border-radius:var(--r-sm);padding:6px;color:var(--on-surface)}
+.tp-btns{display:flex;gap:10px}
+
+/* LINKS POPUP */
+.lnk-box{background:var(--white);border-radius:var(--r-xl);width:100%;max-width:360px;padding:28px;box-shadow:var(--sh-lg)}
+.lnk-lbl{font-size:11px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.1em}
+.lnk-code{font-family:var(--disp);font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--secondary),var(--tertiary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px}
+.lnk-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r-md);border:2px solid var(--outline);text-decoration:none;color:var(--on-surface);margin-bottom:10px;transition:all .2s;font-weight:600}
+.lnk-item.dis{opacity:.4;pointer-events:none}
+.lnk-item:not(.dis):hover{transform:translateX(6px)}
+.lnk-item.ltt:not(.dis):hover{border-color:var(--tiktok);background:#fff5f7}
+.lnk-item.lig:not(.dis):hover{border-color:var(--ig);background:#fdf0f5}
+.lnk-item.lyt:not(.dis):hover{border-color:var(--yt);background:#fff5f5}
+.lnk-ic{font-size:22px;flex-shrink:0}
+.lnk-info{flex:1;min-width:0}
+.lnk-plat{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--on-var)}
+.lnk-url{font-size:12px;color:var(--on-var);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lnk-arrow{color:var(--on-var);font-size:16px;flex-shrink:0}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--on-surface);color:#fff;border-radius:var(--r-md);padding:14px 20px;font-size:13px;font-weight:700;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:10px;max-width:320px;box-shadow:var(--sh-lg)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#2e7d32}.toast.err{background:#c62828}
+
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+input[type=number]{-moz-appearance:textfield}
+</style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen">
-  <div class="auth-box">
-    <div class="auth-logo">Content Studio</div>
-    <div class="auth-title">Performance<br/>Dashboard</div>
-    <div class="form-group">
-      <label class="form-label">Email</label>
-      <input type="email" id="auth-email" class="form-input" placeholder="email@anda.com" />
+  <div class="auth-card">
+    <div class="auth-deco">💎</div>
+    <div class="auth-title">Content Dashboard</div>
+    <div class="auth-sub">Toko Mas Lia ✨</div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-masuk" onclick="switchTab('masuk')">Masuk</button>
+      <button class="tab-btn" id="tab-daftar" onclick="switchTab('daftar')">Daftar</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input type="password" id="auth-password" class="form-input" placeholder="••••••••" />
+    <!-- LOGIN -->
+    <div id="form-masuk">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" id="l-user" class="form-input" placeholder="username kamu" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="l-pw" class="form-input pi" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="eye-btn" type="button" onclick="togglePw('l-pw',this)">👁️</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="btn-login">Masuk →</button>
     </div>
-    <button class="btn-primary" id="btn-login">Masuk</button>
-    <div class="auth-error" id="auth-error"></div>
+    <!-- REGISTER -->
+    <div id="form-daftar" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" id="r-user" class="form-input" placeholder="pilih username unik" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="r-pw" class="form-input pi" placeholder="min. 6 karakter" autocomplete="new-password"/>
+          <button class="eye-btn" type="button" onclick="togglePw('r-pw',this)">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Konfirmasi Password</label>
+        <div class="input-wrap">
+          <input type="password" id="r-pw2" class="form-input pi" placeholder="ulangi password" autocomplete="new-password"/>
+          <button class="eye-btn" type="button" onclick="togglePw('r-pw2',this)">👁️</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="btn-register">Buat Akun ✨</button>
+    </div>
+    <div class="auth-msg auth-err" id="auth-err"></div>
+    <div class="auth-msg auth-ok" id="auth-ok"></div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard">
   <div class="topbar">
-    <div class="topbar-brand">Dashboard</div>
-    <div class="topbar-right">
-      <span id="user-email" style="font-size:12px;color:var(--text-dim)"></span>
-      <button class="btn-logout" id="btn-logout">Keluar</button>
+    <div class="t-brand">
+      <div class="t-icon">💎</div>
+      <div class="t-name">Toko Mas Lia</div>
+    </div>
+    <div class="t-right">
+      <div class="u-chip"><div class="u-av" id="u-av">?</div><span id="u-lbl">—</span></div>
+      <button class="btn-out" id="btn-out">Keluar</button>
     </div>
   </div>
-
-  <div class="main-content">
-    <!-- Stats -->
+  <div class="main">
+    <div class="sec-lbl">📊 Ringkasan Total Views</div>
     <div class="stats-row">
-      <div class="stat-card tiktok">
-        <div class="stat-platform">TikTok — Total Views</div>
-        <div class="stat-value" id="stat-tiktok">0</div>
-      </div>
-      <div class="stat-card instagram">
-        <div class="stat-platform">Instagram — Total Views</div>
-        <div class="stat-value" id="stat-instagram">0</div>
-      </div>
-      <div class="stat-card youtube">
-        <div class="stat-platform">YouTube — Total Views</div>
-        <div class="stat-value" id="stat-youtube">0</div>
-      </div>
+      <div class="s-card tt"><div class="s-icon">🎵</div><div class="s-plat">TikTok</div><div class="s-val" id="sv-tt">0</div><div class="s-sub">total views</div></div>
+      <div class="s-card ig"><div class="s-icon">📸</div><div class="s-plat">Instagram</div><div class="s-val" id="sv-ig">0</div><div class="s-sub">total views</div></div>
+      <div class="s-card yt"><div class="s-icon">▶️</div><div class="s-plat">YouTube</div><div class="s-val" id="sv-yt">0</div><div class="s-sub">total views</div></div>
     </div>
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="toolbar-title">Daftar Post</div>
-      <button class="btn-add" id="btn-add-post">
-        <span>＋</span> Tambah Post
-      </button>
+    <div class="sec-lbl">📈 Analisis Performa</div>
+    <div class="charts-grid">
+      <div class="c-card c-full"><div class="c-title">📅 Trend Views per Tanggal</div><div class="c-sub">Total views harian dari semua platform</div><div class="c-wrap tall"><canvas id="ch-trend"></canvas></div></div>
+      <div class="c-card"><div class="c-title">🏆 Perbandingan Platform</div><div class="c-sub">Distribusi total views per platform</div><div class="c-wrap"><canvas id="ch-donut"></canvas></div></div>
+      <div class="c-card"><div class="c-title">⭐ Top 5 Video</div><div class="c-sub">Video dengan views terbanyak (gabungan)</div><div class="c-wrap"><canvas id="ch-top"></canvas></div></div>
+      <div class="c-card c-full"><div class="c-title">📊 Breakdown Views per Video</div><div class="c-sub">Perbandingan views tiap platform per kode video (10 terakhir)</div><div class="c-wrap tall"><canvas id="ch-bar"></canvas></div></div>
     </div>
-
-    <!-- Table -->
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Tanggal</th>
-            <th>Jam Upload</th>
-            <th>Kode Video</th>
-            <th>Views</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="posts-tbody">
-          <tr><td colspan="6"><div class="loading">Memuat data...</div></td></tr>
-        </tbody>
-      </table>
+    <div class="sec-lbl">🎬 Daftar Post</div>
+    <div class="tbl-card">
+      <div class="tbl-hdr">
+        <div class="tbl-ttl">Semua Post</div>
+        <button class="btn-add" id="btn-add">＋ Tambah Post</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>No.</th><th>Tanggal</th><th>Jam</th><th>Kode Video</th><th>Views</th><th>Aksi</th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="6"><div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Memuat data...</div></div></td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL: ADD/EDIT POST -->
-<div class="modal-overlay" id="post-modal">
+<!-- MODAL POST -->
+<div class="overlay" id="ov-post">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-title">Tambah Post</div>
-      <button class="modal-close" id="modal-close-btn">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-grid">
-        <div>
-          <label class="form-label">Tanggal</label>
-          <input type="date" id="input-tanggal" class="form-input" />
-        </div>
-        <div>
-          <label class="form-label">Nomor</label>
-          <input type="number" id="input-nomor" class="form-input" placeholder="1" min="1" />
-        </div>
-        <div>
-          <label class="form-label">Jam Upload</label>
-          <input type="text" id="input-jam" class="form-input" placeholder="Klik untuk pilih jam" readonly style="cursor:pointer" id="input-jam" />
-        </div>
-        <div>
-          <label class="form-label">Kode Video</label>
-          <input type="text" id="input-kode" class="form-input" placeholder="VID-001" />
-        </div>
-        <div class="full">
-          <label class="form-label">Link TikTok</label>
-          <input type="url" id="input-link-tiktok" class="form-input" placeholder="https://tiktok.com/@..." />
-        </div>
-        <div class="full">
-          <label class="form-label">Link Instagram</label>
-          <input type="url" id="input-link-instagram" class="form-input" placeholder="https://instagram.com/p/..." />
-        </div>
-        <div class="full">
-          <label class="form-label">Link YouTube</label>
-          <input type="url" id="input-link-youtube" class="form-input" placeholder="https://youtube.com/watch?v=..." />
-        </div>
-        <div>
-          <label class="form-label">Views TikTok</label>
-          <input type="number" id="input-views-tiktok" class="form-input" placeholder="0" min="0" />
-        </div>
-        <div>
-          <label class="form-label">Views Instagram</label>
-          <input type="number" id="input-views-instagram" class="form-input" placeholder="0" min="0" />
-        </div>
-        <div class="full">
-          <label class="form-label">Views YouTube</label>
-          <input type="number" id="input-views-youtube" class="form-input" placeholder="0" min="0" />
-        </div>
+    <div class="m-hdr"><div class="m-ttl" id="m-ttl">Tambah Post</div><button class="m-x" id="m-x">✕</button></div>
+    <div class="m-body">
+      <div class="g2">
+        <div><label class="form-label">Tanggal</label><input type="date" id="f-tgl" class="form-input"/></div>
+        <div><label class="form-label">Jam Upload</label><div class="input-wrap"><input type="text" id="f-jam" class="form-input" placeholder="Ketuk untuk pilih jam" readonly style="cursor:pointer"/></div></div>
+        <div class="full"><label class="form-label">Kode Video</label><input type="text" id="f-kode" class="form-input" placeholder="VID-001"/></div>
+        <div class="full"><label class="form-label">Link TikTok</label><input type="url" id="f-tt" class="form-input" placeholder="https://tiktok.com/@..."/></div>
+        <div class="full"><label class="form-label">Link Instagram</label><input type="url" id="f-ig" class="form-input" placeholder="https://instagram.com/p/..."/></div>
+        <div class="full"><label class="form-label">Link YouTube</label><input type="url" id="f-yt" class="form-input" placeholder="https://youtube.com/watch?v=..."/></div>
+        <div><label class="form-label">Views TikTok</label><input type="number" id="f-vtt" class="form-input" placeholder="0" min="0"/></div>
+        <div><label class="form-label">Views Instagram</label><input type="number" id="f-vig" class="form-input" placeholder="0" min="0"/></div>
+        <div class="full"><label class="form-label">Views YouTube</label><input type="number" id="f-vyt" class="form-input" placeholder="0" min="0"/></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" id="modal-cancel-btn">Batal</button>
-      <button class="btn-save" id="modal-save-btn">Simpan</button>
-    </div>
+    <div class="m-ftr"><button class="btn-cancel" id="m-cancel">Batal</button><button class="btn-save" id="m-save">Simpan ✨</button></div>
   </div>
 </div>
 
-<!-- MODAL: TIME PICKER -->
-<div class="modal-overlay" id="time-modal">
-  <div class="time-picker-modal">
-    <div class="time-picker-title">Pilih Jam Upload</div>
-    <div class="time-display" id="time-display">00:00</div>
-    <div class="time-controls">
-      <div class="time-col">
-        <label>Jam</label>
-        <div class="time-spin">
-          <button class="spin-btn" id="hour-up">▲</button>
-          <div class="spin-value" id="hour-val">00</div>
-          <button class="spin-btn" id="hour-down">▼</button>
-        </div>
-      </div>
-      <div class="time-col">
-        <label>Menit</label>
-        <div class="time-spin">
-          <button class="spin-btn" id="min-up">▲</button>
-          <div class="spin-value" id="min-val">00</div>
-          <button class="spin-btn" id="min-down">▼</button>
-        </div>
-      </div>
+<!-- MODAL TIME PICKER -->
+<div class="overlay" id="ov-time">
+  <div class="tp-box">
+    <div class="tp-ttl">🕐 Pilih Jam Upload</div>
+    <div class="tp-disp" id="tp-disp">00:00</div>
+    <div class="tp-cols">
+      <div><div class="tp-col-lbl">Jam</div><div class="spin"><button class="spin-btn" id="h-up">▲</button><div class="spin-val" id="h-val">00</div><button class="spin-btn" id="h-dn">▼</button></div></div>
+      <div><div class="tp-col-lbl">Menit</div><div class="spin"><button class="spin-btn" id="m-up">▲</button><div class="spin-val" id="m-val">00</div><button class="spin-btn" id="m-dn">▼</button></div></div>
     </div>
-    <div style="display:flex;gap:12px;">
-      <button class="btn-cancel" style="flex:1" id="time-cancel">Batal</button>
-      <button class="btn-save" style="flex:1" id="time-confirm">Pilih</button>
-    </div>
+    <div class="tp-btns"><button class="btn-cancel" style="flex:1" id="tp-cancel">Batal</button><button class="btn-save" style="flex:1" id="tp-ok">Pilih ✓</button></div>
   </div>
 </div>
 
-<!-- MODAL: LINKS POPUP -->
-<div class="modal-overlay" id="links-modal">
-  <div class="links-popup">
-    <div class="links-popup-title">Kode Video</div>
-    <div class="links-popup-code" id="links-code"></div>
-    <a class="link-item tiktok" id="link-tiktok" href="#" target="_blank" rel="noopener">
-      <span class="link-icon">🎵</span>
-      <div class="link-info">
-        <div class="link-platform">TikTok</div>
-        <div class="link-url" id="link-tiktok-url">—</div>
-      </div>
-      <span class="link-arrow">→</span>
-    </a>
-    <a class="link-item instagram" id="link-instagram" href="#" target="_blank" rel="noopener">
-      <span class="link-icon">📸</span>
-      <div class="link-info">
-        <div class="link-platform">Instagram</div>
-        <div class="link-url" id="link-instagram-url">—</div>
-      </div>
-      <span class="link-arrow">→</span>
-    </a>
-    <a class="link-item youtube" id="link-youtube" href="#" target="_blank" rel="noopener">
-      <span class="link-icon">▶️</span>
-      <div class="link-info">
-        <div class="link-platform">YouTube</div>
-        <div class="link-url" id="link-youtube-url">—</div>
-      </div>
-      <span class="link-arrow">→</span>
-    </a>
-    <button class="btn-cancel" style="width:100%;margin-top:16px" id="links-close">Tutup</button>
+<!-- MODAL LINKS -->
+<div class="overlay" id="ov-links">
+  <div class="lnk-box">
+    <div class="lnk-lbl">Kode Video</div>
+    <div class="lnk-code" id="lnk-code">—</div>
+    <a class="lnk-item ltt" id="lnk-tt" href="#" target="_blank" rel="noopener"><div class="lnk-ic">🎵</div><div class="lnk-info"><div class="lnk-plat">TikTok</div><div class="lnk-url" id="lnk-tt-url">Tidak ada link</div></div><span class="lnk-arrow">→</span></a>
+    <a class="lnk-item lig" id="lnk-ig" href="#" target="_blank" rel="noopener"><div class="lnk-ic">📸</div><div class="lnk-info"><div class="lnk-plat">Instagram</div><div class="lnk-url" id="lnk-ig-url">Tidak ada link</div></div><span class="lnk-arrow">→</span></a>
+    <a class="lnk-item lyt" id="lnk-yt" href="#" target="_blank" rel="noopener"><div class="lnk-ic">▶️</div><div class="lnk-info"><div class="lnk-plat">YouTube</div><div class="lnk-url" id="lnk-yt-url">Tidak ada link</div></div><span class="lnk-arrow">→</span></a>
+    <button class="btn-cancel" style="width:100%;margin-top:16px" id="lnk-close">Tutup</button>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ============================================================
-// CONFIG — GANTI DENGAN MILIK MASTER
-// ============================================================
-const SUPABASE_URL = 'https://bvkrqzmcdpkkrldakdcf.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_LSYHeAlqbAHt-uqJ65_sMg_0x3yV3zw';
-// ============================================================
+const SUPABASE_URL='https://bvkrqzmcdpkkrldakdcf.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_LSYHeAlqbAHt-uqJ65_sMg_0x3yV3zw';
+const {createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// UTILS
+const p2=n=>String(n).padStart(2,'0');
+const nowTime=()=>{const d=new Date();return`${p2(d.getHours())}:${p2(d.getMinutes())}`;};
+const todayStr=()=>new Date().toISOString().split('T')[0];
+function fmtV(n){if(n==null||n===''||isNaN(n))return'—';n=parseInt(n);if(n>=1000000)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString('id-ID');}
+function fmtD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+function showToast(msg,type='ok'){const el=document.getElementById('toast');el.innerHTML=`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`;el.className=`toast show ${type}`;setTimeout(()=>el.className='toast',3000);}
 
-// ---- STATE ----
-let editingId = null;
-let pickerHour = 0;
-let pickerMin = 0;
-
-// ---- UTILS ----
-function fmt2(n) { return String(n).padStart(2, '0'); }
-
-function fmtViews(n) {
-  if (!n && n !== 0) return '—';
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
-  return n.toLocaleString('id-ID');
+// AUTH HELPERS
+function switchTab(t){
+  document.getElementById('form-masuk').style.display=t==='masuk'?'block':'none';
+  document.getElementById('form-daftar').style.display=t==='daftar'?'block':'none';
+  document.getElementById('tab-masuk').className='tab-btn'+(t==='masuk'?' active':'');
+  document.getElementById('tab-daftar').className='tab-btn'+(t==='daftar'?' active':'');
+  document.getElementById('auth-err').style.display='none';
+  document.getElementById('auth-ok').style.display='none';
 }
+function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈';}else{i.type='password';btn.textContent='👁️';}}
+function showErr(msg){const e=document.getElementById('auth-err');e.textContent=msg;e.style.display='block';document.getElementById('auth-ok').style.display='none';}
+function showOk(msg){const e=document.getElementById('auth-ok');e.textContent=msg;e.style.display='block';document.getElementById('auth-err').style.display='none';}
+const uToEmail=u=>`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@tokomaslia.internal`;
 
-function fmtDate(d) {
-  if (!d) return '—';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+// LOGIN
+document.getElementById('btn-login').addEventListener('click',async()=>{
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pw').value;
+  document.getElementById('auth-err').style.display='none';
+  if(!u||!p){showErr('Username dan password wajib diisi.');return;}
+  const btn=document.getElementById('btn-login');
+  btn.disabled=true;btn.textContent='Memuat...';
+  const{error}=await sb.auth.signInWithPassword({email:uToEmail(u),password:p});
+  btn.disabled=false;btn.textContent='Masuk →';
+  if(error)showErr('Username atau password salah.');
+});
+document.getElementById('l-pw').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btn-login').click();});
 
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  setTimeout(() => t.className = 'toast', 2500);
-}
+// REGISTER
+document.getElementById('btn-register').addEventListener('click',async()=>{
+  const u=document.getElementById('r-user').value.trim();
+  const p=document.getElementById('r-pw').value;
+  const p2=document.getElementById('r-pw2').value;
+  document.getElementById('auth-err').style.display='none';
+  if(!u){showErr('Username wajib diisi.');return;}
+  if(u.length<3){showErr('Username minimal 3 karakter.');return;}
+  if(p.length<6){showErr('Password minimal 6 karakter.');return;}
+  if(p!==p2){showErr('Konfirmasi password tidak sama.');return;}
+  const btn=document.getElementById('btn-register');
+  btn.disabled=true;btn.textContent='Mendaftar...';
+  const{error}=await sb.auth.signUp({email:uToEmail(u),password:p,options:{data:{username:u}}});
+  btn.disabled=false;btn.textContent='Buat Akun ✨';
+  if(error){showErr('Gagal mendaftar: '+error.message);return;}
+  showOk('Akun berhasil dibuat! Silakan masuk.');
+  setTimeout(()=>switchTab('masuk'),1500);
+});
 
-// ---- AUTH ----
-document.getElementById('btn-login').addEventListener('click', async () => {
-  const email = document.getElementById('auth-email').value.trim();
-  const pass = document.getElementById('auth-password').value;
-  const btn = document.getElementById('btn-login');
-  const err = document.getElementById('auth-error');
-  err.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Memuat...';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.disabled = false;
-  btn.textContent = 'Masuk';
-  if (error) {
-    err.textContent = 'Email atau password salah.';
-    err.style.display = 'block';
+// LOGOUT
+document.getElementById('btn-out').addEventListener('click',()=>sb.auth.signOut());
+
+// AUTH STATE
+sb.auth.onAuthStateChange((ev,session)=>{
+  if(session){
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    const meta=session.user.user_metadata;
+    const uname=meta?.username||session.user.email.split('@')[0];
+    document.getElementById('u-lbl').textContent=uname;
+    document.getElementById('u-av').textContent=uname[0].toUpperCase();
+    loadAll();
+  }else{
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('dashboard').style.display='none';
   }
 });
 
-document.getElementById('auth-password').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('btn-login').click();
-});
+// DATA
+let allPosts=[];
+async function loadAll(){
+  const{data,error}=await sb.from('posts').select('*').order('tanggal',{ascending:true}).order('nomor',{ascending:true});
+  if(error){showToast('Gagal memuat data','err');return;}
+  allPosts=data||[];
+  renderTable(allPosts);
+  renderStats(allPosts);
+  renderCharts(allPosts);
+}
 
-document.getElementById('btn-logout').addEventListener('click', async () => {
-  await sb.auth.signOut();
-});
+async function getNextNomor(tanggal,excludeId=null){
+  let q=sb.from('posts').select('nomor').eq('tanggal',tanggal).order('nomor',{ascending:false}).limit(1);
+  if(excludeId) q=q.neq('id',excludeId);
+  const{data}=await q;
+  if(!data||!data.length)return 1;
+  return(data[0].nomor||0)+1;
+}
 
-sb.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    document.getElementById('user-email').textContent = session.user.email;
-    loadPosts();
-  } else {
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
+// STATS
+function renderStats(data){
+  document.getElementById('sv-tt').textContent=fmtV(data.reduce((s,r)=>s+(parseInt(r.views_tiktok)||0),0));
+  document.getElementById('sv-ig').textContent=fmtV(data.reduce((s,r)=>s+(parseInt(r.views_instagram)||0),0));
+  document.getElementById('sv-yt').textContent=fmtV(data.reduce((s,r)=>s+(parseInt(r.views_youtube)||0),0));
+}
+
+// CHARTS
+const CI={};
+function dc(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
+const C={tt:'rgba(255,45,85,.85)',ttL:'rgba(255,45,85,.2)',ig:'rgba(194,24,91,.85)',igL:'rgba(194,24,91,.2)',yt:'rgba(229,57,53,.85)',ytL:'rgba(229,57,53,.2)'};
+
+function renderCharts(data){
+  // TREND
+  dc('ch-trend');
+  const bd={};
+  data.forEach(r=>{const d=r.tanggal||'?';if(!bd[d])bd[d]={tt:0,ig:0,yt:0};bd[d].tt+=parseInt(r.views_tiktok)||0;bd[d].ig+=parseInt(r.views_instagram)||0;bd[d].yt+=parseInt(r.views_youtube)||0;});
+  const dl=Object.keys(bd).sort();
+  if(dl.length){
+    CI['ch-trend']=new Chart(document.getElementById('ch-trend'),{type:'line',data:{labels:dl.map(d=>fmtD(d)),datasets:[{label:'TikTok',data:dl.map(d=>bd[d].tt),borderColor:C.tt,backgroundColor:C.ttL,tension:.4,fill:true,pointRadius:4,pointHoverRadius:7},{label:'Instagram',data:dl.map(d=>bd[d].ig),borderColor:C.ig,backgroundColor:C.igL,tension:.4,fill:true,pointRadius:4,pointHoverRadius:7},{label:'YouTube',data:dl.map(d=>bd[d].yt),borderColor:C.yt,backgroundColor:C.ytL,tension:.4,fill:true,pointRadius:4,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Quicksand',weight:'700'},boxRadius:6,padding:16}}},scales:{x:{grid:{color:'rgba(194,24,91,.06)'},ticks:{font:{family:'Quicksand',size:11}}},y:{grid:{color:'rgba(194,24,91,.06)'},ticks:{font:{family:'Quicksand',size:11},callback:v=>fmtV(v)}}}}});
   }
+
+  // DONUT
+  dc('ch-donut');
+  const ttt=data.reduce((s,r)=>s+(parseInt(r.views_tiktok)||0),0);
+  const tig=data.reduce((s,r)=>s+(parseInt(r.views_instagram)||0),0);
+  const tyt=data.reduce((s,r)=>s+(parseInt(r.views_youtube)||0),0);
+  CI['ch-donut']=new Chart(document.getElementById('ch-donut'),{type:'doughnut',data:{labels:['TikTok','Instagram','YouTube'],datasets:[{data:[ttt,tig,tyt],backgroundColor:[C.tt,C.ig,C.yt],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{family:'Quicksand',weight:'700'},boxRadius:6,padding:16}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmtV(ctx.parsed)}`}}}}});
+
+  // TOP 5
+  dc('ch-top');
+  const scored=data.map(r=>({kode:r.kode_video||'?',total:(parseInt(r.views_tiktok)||0)+(parseInt(r.views_instagram)||0)+(parseInt(r.views_youtube)||0)})).sort((a,b)=>b.total-a.total).slice(0,5);
+  if(scored.length){
+    CI['ch-top']=new Chart(document.getElementById('ch-top'),{type:'bar',data:{labels:scored.map(r=>r.kode),datasets:[{label:'Total Views',data:scored.map(r=>r.total),backgroundColor:['rgba(194,24,91,.85)','rgba(156,39,176,.85)','rgba(224,64,251,.85)','rgba(255,45,85,.75)','rgba(230,74,150,.75)'],borderRadius:10,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${fmtV(ctx.parsed.x)} views`}}},scales:{x:{grid:{color:'rgba(194,24,91,.06)'},ticks:{font:{family:'Quicksand',size:11},callback:v=>fmtV(v)}},y:{grid:{display:false},ticks:{font:{family:'Quicksand',size:11,weight:'700'}}}}}});
+  }
+
+  // BREAKDOWN
+  dc('ch-bar');
+  const recent=data.slice(-10);
+  if(recent.length){
+    CI['ch-bar']=new Chart(document.getElementById('ch-bar'),{type:'bar',data:{labels:recent.map(r=>r.kode_video||'?'),datasets:[{label:'TikTok',data:recent.map(r=>parseInt(r.views_tiktok)||0),backgroundColor:C.tt,borderRadius:6,borderSkipped:false},{label:'Instagram',data:recent.map(r=>parseInt(r.views_instagram)||0),backgroundColor:C.ig,borderRadius:6,borderSkipped:false},{label:'YouTube',data:recent.map(r=>parseInt(r.views_youtube)||0),backgroundColor:C.yt,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Quicksand',weight:'700'},boxRadius:6,padding:16}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Quicksand',size:11}}},y:{grid:{color:'rgba(194,24,91,.06)'},ticks:{font:{family:'Quicksand',size:11},callback:v=>fmtV(v)}}}}});
+  }
+}
+
+// TABLE
+function renderTable(data){
+  const tb=document.getElementById('tbody');
+  const sorted=[...data].sort((a,b)=>{if(b.tanggal>a.tanggal)return 1;if(b.tanggal<a.tanggal)return-1;return(a.nomor||0)-(b.nomor||0);});
+  if(!sorted.length){tb.innerHTML=`<tr><td colspan="6"><div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Belum ada data. Yuk tambah post pertama!</div></div></td></tr>`;return;}
+  tb.innerHTML=sorted.map(r=>`<tr>
+    <td><span class="badge-no">${r.nomor||'?'}</span></td>
+    <td><span class="chip-date">${fmtD(r.tanggal)}</span></td>
+    <td><span class="chip-time">${r.jam_upload||'—'}</span></td>
+    <td><button class="code-btn" onclick='openLinks(${JSON.stringify(r).replace(/'/g,"&#39;")})'>${r.kode_video||'—'}</button></td>
+    <td><div class="v-cell"><div class="v-row"><span class="v-dot tt"></span>${fmtV(r.views_tiktok)}</div><div class="v-row"><span class="v-dot ig"></span>${fmtV(r.views_instagram)}</div><div class="v-row"><span class="v-dot yt"></span>${fmtV(r.views_youtube)}</div></div></td>
+    <td><div class="act-cell"><button class="btn-edit" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button><button class="btn-del" onclick="delPost('${r.id}')">🗑️ Hapus</button></div></td>
+  </tr>`).join('');
+}
+
+// LINKS POPUP
+function openLinks(r){
+  document.getElementById('lnk-code').textContent=r.kode_video||'—';
+  function setL(aid,uid,url){const a=document.getElementById(aid);const u=document.getElementById(uid);if(url){a.href=url;u.textContent=url.replace('https://','').substring(0,38)+(url.length>41?'…':'');a.classList.remove('dis');}else{a.href='#';u.textContent='Tidak ada link';a.classList.add('dis');}}
+  setL('lnk-tt','lnk-tt-url',r.link_tiktok);setL('lnk-ig','lnk-ig-url',r.link_instagram);setL('lnk-yt','lnk-yt-url',r.link_youtube);
+  document.getElementById('ov-links').classList.add('open');
+}
+document.getElementById('lnk-close').addEventListener('click',()=>document.getElementById('ov-links').classList.remove('open'));
+document.getElementById('ov-links').addEventListener('click',e=>{if(e.target===document.getElementById('ov-links'))document.getElementById('ov-links').classList.remove('open');});
+
+// TIME PICKER
+let tH=0,tM=0;
+function updTP(){document.getElementById('h-val').textContent=p2(tH);document.getElementById('m-val').textContent=p2(tM);document.getElementById('tp-disp').textContent=`${p2(tH)}:${p2(tM)}`;}
+document.getElementById('h-up').addEventListener('click',()=>{tH=(tH+1)%24;updTP();});
+document.getElementById('h-dn').addEventListener('click',()=>{tH=(tH-1+24)%24;updTP();});
+document.getElementById('m-up').addEventListener('click',()=>{tM=(tM+1)%60;updTP();});
+document.getElementById('m-dn').addEventListener('click',()=>{tM=(tM-1+60)%60;updTP();});
+document.getElementById('f-jam').addEventListener('click',()=>{
+  const cur=document.getElementById('f-jam').value;
+  if(cur){const[h,m]=cur.split(':');tH=parseInt(h);tM=parseInt(m);}
+  else{const n=nowTime().split(':');tH=parseInt(n[0]);tM=parseInt(n[1]);}
+  updTP();document.getElementById('ov-time').classList.add('open');
+});
+document.getElementById('tp-ok').addEventListener('click',()=>{document.getElementById('f-jam').value=`${p2(tH)}:${p2(tM)}`;document.getElementById('ov-time').classList.remove('open');});
+document.getElementById('tp-cancel').addEventListener('click',()=>document.getElementById('ov-time').classList.remove('open'));
+
+// POST MODAL
+let editId=null;
+function clearForm(){['f-tgl','f-jam','f-kode','f-tt','f-ig','f-yt','f-vtt','f-vig','f-vyt'].forEach(id=>document.getElementById(id).value='');}
+
+document.getElementById('btn-add').addEventListener('click',()=>{
+  editId=null;clearForm();
+  document.getElementById('f-tgl').value=todayStr();
+  document.getElementById('f-jam').value=nowTime();
+  document.getElementById('m-ttl').textContent='Tambah Post';
+  document.getElementById('ov-post').classList.add('open');
 });
 
-// ---- LOAD POSTS ----
-async function loadPosts() {
-  const { data, error } = await sb.from('posts').select('*').order('tanggal', { ascending: false }).order('nomor', { ascending: true });
-  if (error) { showToast('Gagal memuat data', 'error'); return; }
-  renderTable(data || []);
-  renderStats(data || []);
+function openEdit(r){
+  editId=r.id;
+  document.getElementById('m-ttl').textContent='Edit Post';
+  document.getElementById('f-tgl').value=r.tanggal||'';
+  document.getElementById('f-jam').value=r.jam_upload||'';
+  document.getElementById('f-kode').value=r.kode_video||'';
+  document.getElementById('f-tt').value=r.link_tiktok||'';
+  document.getElementById('f-ig').value=r.link_instagram||'';
+  document.getElementById('f-yt').value=r.link_youtube||'';
+  document.getElementById('f-vtt').value=r.views_tiktok??'';
+  document.getElementById('f-vig').value=r.views_instagram??'';
+  document.getElementById('f-vyt').value=r.views_youtube??'';
+  document.getElementById('ov-post').classList.add('open');
 }
 
-function renderStats(data) {
-  const ttk = data.reduce((s, r) => s + (parseInt(r.views_tiktok) || 0), 0);
-  const ig = data.reduce((s, r) => s + (parseInt(r.views_instagram) || 0), 0);
-  const yt = data.reduce((s, r) => s + (parseInt(r.views_youtube) || 0), 0);
-  document.getElementById('stat-tiktok').textContent = fmtViews(ttk);
-  document.getElementById('stat-instagram').textContent = fmtViews(ig);
-  document.getElementById('stat-youtube').textContent = fmtViews(yt);
-}
+function closePost(){document.getElementById('ov-post').classList.remove('open');editId=null;}
+document.getElementById('m-x').addEventListener('click',closePost);
+document.getElementById('m-cancel').addEventListener('click',closePost);
+document.getElementById('ov-post').addEventListener('click',e=>{if(e.target===document.getElementById('ov-post'))closePost();});
 
-function renderTable(data) {
-  const tbody = document.getElementById('posts-tbody');
-  if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">📭</div><p>Belum ada data post.<br/>Klik "+ Tambah Post" untuk mulai.</p></div></td></tr>`;
-    return;
+document.getElementById('m-save').addEventListener('click',async()=>{
+  const tanggal=document.getElementById('f-tgl').value;
+  const kode=document.getElementById('f-kode').value.trim();
+  if(!tanggal){showToast('Tanggal wajib diisi','err');return;}
+  if(!kode){showToast('Kode video wajib diisi','err');return;}
+
+  // CEK DUPLIKAT KODE VIDEO
+  const dup=allPosts.find(p=>p.kode_video===kode&&p.id!==editId);
+  if(dup){showToast(`Kode "${kode}" sudah dipakai! Gunakan kode lain.`,'err');return;}
+
+  const btn=document.getElementById('m-save');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+
+  // AUTO NOMOR
+  let nomor;
+  if(editId){
+    const cur=allPosts.find(p=>p.id===editId);
+    if(cur?.tanggal===tanggal){nomor=cur.nomor;}
+    else{nomor=await getNextNomor(tanggal,editId);}
+  }else{
+    nomor=await getNextNomor(tanggal);
   }
-  tbody.innerHTML = data.map(row => `
-    <tr>
-      <td><span style="color:var(--text-dim)">#${row.nomor || '—'}</span></td>
-      <td>${fmtDate(row.tanggal)}</td>
-      <td><span style="color:var(--accent)">${row.jam_upload || '—'}</span></td>
-      <td>
-        <button class="code-btn" onclick="openLinks(${JSON.stringify(row).replace(/"/g,'&quot;')})">
-          ${row.kode_video || '—'}
-        </button>
-      </td>
-      <td>
-        <div class="views-cell">
-          <div class="view-item"><span class="view-dot tiktok"></span>${fmtViews(row.views_tiktok)}</div>
-          <div class="view-item"><span class="view-dot instagram"></span>${fmtViews(row.views_instagram)}</div>
-          <div class="view-item"><span class="view-dot youtube"></span>${fmtViews(row.views_youtube)}</div>
-        </div>
-      </td>
-      <td>
-        <div class="action-cell">
-          <button class="action-btn" onclick="openEdit(${JSON.stringify(row).replace(/"/g,'&quot;')})">Edit</button>
-          <button class="action-btn del" onclick="deletePost('${row.id}')">Hapus</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
 
-// ---- LINKS POPUP ----
-function openLinks(row) {
-  document.getElementById('links-code').textContent = row.kode_video || '—';
-
-  const setLink = (elId, urlId, url, cssClass) => {
-    const el = document.getElementById(elId);
-    const urlEl = document.getElementById(urlId);
-    if (url) {
-      el.href = url;
-      urlEl.textContent = url.replace('https://','').substring(0, 35) + (url.length > 38 ? '…' : '');
-      el.classList.remove('no-link');
-    } else {
-      el.href = '#';
-      urlEl.textContent = 'Tidak ada link';
-      el.classList.add('no-link');
-    }
+  const payload={
+    tanggal,nomor,
+    jam_upload:document.getElementById('f-jam').value||null,
+    kode_video:kode,
+    link_tiktok:document.getElementById('f-tt').value.trim()||null,
+    link_instagram:document.getElementById('f-ig').value.trim()||null,
+    link_youtube:document.getElementById('f-yt').value.trim()||null,
+    views_tiktok:parseInt(document.getElementById('f-vtt').value)||0,
+    views_instagram:parseInt(document.getElementById('f-vig').value)||0,
+    views_youtube:parseInt(document.getElementById('f-vyt').value)||0,
   };
-
-  setLink('link-tiktok', 'link-tiktok-url', row.link_tiktok, 'tiktok');
-  setLink('link-instagram', 'link-instagram-url', row.link_instagram, 'instagram');
-  setLink('link-youtube', 'link-youtube-url', row.link_youtube, 'youtube');
-
-  document.getElementById('links-modal').classList.add('open');
-}
-
-document.getElementById('links-close').addEventListener('click', () => {
-  document.getElementById('links-modal').classList.remove('open');
-});
-
-document.getElementById('links-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('links-modal'))
-    document.getElementById('links-modal').classList.remove('open');
-});
-
-// ---- TIME PICKER ----
-function updateTimePicker() {
-  document.getElementById('hour-val').textContent = fmt2(pickerHour);
-  document.getElementById('min-val').textContent = fmt2(pickerMin);
-  document.getElementById('time-display').textContent = `${fmt2(pickerHour)}:${fmt2(pickerMin)}`;
-}
-
-document.getElementById('hour-up').addEventListener('click', () => { pickerHour = (pickerHour + 1) % 24; updateTimePicker(); });
-document.getElementById('hour-down').addEventListener('click', () => { pickerHour = (pickerHour - 1 + 24) % 24; updateTimePicker(); });
-document.getElementById('min-up').addEventListener('click', () => { pickerMin = (pickerMin + 1) % 60; updateTimePicker(); });
-document.getElementById('min-down').addEventListener('click', () => { pickerMin = (pickerMin - 1 + 60) % 60; updateTimePicker(); });
-
-document.getElementById('input-jam').addEventListener('click', () => {
-  const cur = document.getElementById('input-jam').value;
-  if (cur) { const [h, m] = cur.split(':'); pickerHour = parseInt(h); pickerMin = parseInt(m); }
-  updateTimePicker();
-  document.getElementById('time-modal').classList.add('open');
-});
-
-document.getElementById('time-confirm').addEventListener('click', () => {
-  document.getElementById('input-jam').value = `${fmt2(pickerHour)}:${fmt2(pickerMin)}`;
-  document.getElementById('time-modal').classList.remove('open');
-});
-
-document.getElementById('time-cancel').addEventListener('click', () => {
-  document.getElementById('time-modal').classList.remove('open');
-});
-
-// ---- POST MODAL ----
-function clearModal() {
-  ['input-tanggal','input-nomor','input-jam','input-kode',
-   'input-link-tiktok','input-link-instagram','input-link-youtube',
-   'input-views-tiktok','input-views-instagram','input-views-youtube']
-    .forEach(id => document.getElementById(id).value = '');
-}
-
-document.getElementById('btn-add-post').addEventListener('click', () => {
-  editingId = null;
-  clearModal();
-  // default tanggal hari ini
-  document.getElementById('input-tanggal').value = new Date().toISOString().split('T')[0];
-  document.getElementById('modal-title').textContent = 'Tambah Post';
-  document.getElementById('post-modal').classList.add('open');
-});
-
-function openEdit(row) {
-  editingId = row.id;
-  document.getElementById('modal-title').textContent = 'Edit Post';
-  document.getElementById('input-tanggal').value = row.tanggal || '';
-  document.getElementById('input-nomor').value = row.nomor || '';
-  document.getElementById('input-jam').value = row.jam_upload || '';
-  document.getElementById('input-kode').value = row.kode_video || '';
-  document.getElementById('input-link-tiktok').value = row.link_tiktok || '';
-  document.getElementById('input-link-instagram').value = row.link_instagram || '';
-  document.getElementById('input-link-youtube').value = row.link_youtube || '';
-  document.getElementById('input-views-tiktok').value = row.views_tiktok ?? '';
-  document.getElementById('input-views-instagram').value = row.views_instagram ?? '';
-  document.getElementById('input-views-youtube').value = row.views_youtube ?? '';
-  document.getElementById('post-modal').classList.add('open');
-}
-
-function closePostModal() {
-  document.getElementById('post-modal').classList.remove('open');
-  editingId = null;
-}
-
-document.getElementById('modal-close-btn').addEventListener('click', closePostModal);
-document.getElementById('modal-cancel-btn').addEventListener('click', closePostModal);
-document.getElementById('post-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('post-modal')) closePostModal();
-});
-
-document.getElementById('modal-save-btn').addEventListener('click', async () => {
-  const payload = {
-    tanggal: document.getElementById('input-tanggal').value || null,
-    nomor: parseInt(document.getElementById('input-nomor').value) || null,
-    jam_upload: document.getElementById('input-jam').value || null,
-    kode_video: document.getElementById('input-kode').value.trim() || null,
-    link_tiktok: document.getElementById('input-link-tiktok').value.trim() || null,
-    link_instagram: document.getElementById('input-link-instagram').value.trim() || null,
-    link_youtube: document.getElementById('input-link-youtube').value.trim() || null,
-    views_tiktok: parseInt(document.getElementById('input-views-tiktok').value) || 0,
-    views_instagram: parseInt(document.getElementById('input-views-instagram').value) || 0,
-    views_youtube: parseInt(document.getElementById('input-views-youtube').value) || 0,
-  };
-
-  const btn = document.getElementById('modal-save-btn');
-  btn.disabled = true; btn.textContent = 'Menyimpan...';
 
   let error;
-  if (editingId) {
-    ({ error } = await sb.from('posts').update(payload).eq('id', editingId));
-  } else {
-    ({ error } = await sb.from('posts').insert(payload));
-  }
+  if(editId)({error}=await sb.from('posts').update(payload).eq('id',editId));
+  else({error}=await sb.from('posts').insert(payload));
 
-  btn.disabled = false; btn.textContent = 'Simpan';
-
-  if (error) { showToast('Gagal menyimpan: ' + error.message, 'error'); return; }
-  showToast(editingId ? 'Post berhasil diperbarui!' : 'Post berhasil ditambahkan!');
-  closePostModal();
-  loadPosts();
+  btn.disabled=false;btn.textContent='Simpan ✨';
+  if(error){showToast('Gagal menyimpan: '+error.message,'err');return;}
+  showToast(editId?'Post berhasil diperbarui! ✨':'Post berhasil ditambahkan! 🎉');
+  closePost();loadAll();
 });
 
-// ---- DELETE ----
-async function deletePost(id) {
-  if (!confirm('Hapus post ini? Tindakan tidak bisa dibatalkan.')) return;
-  const { error } = await sb.from('posts').delete().eq('id', id);
-  if (error) { showToast('Gagal menghapus', 'error'); return; }
-  showToast('Post dihapus.');
-  loadPosts();
+// DELETE
+async function delPost(id){
+  if(!confirm('Yakin hapus post ini? Tidak bisa dibatalkan ya! 🥺'))return;
+  const{error}=await sb.from('posts').delete().eq('id',id);
+  if(error){showToast('Gagal menghapus','err');return;}
+  showToast('Post dihapus 🗑️');loadAll();
 }
 </script>
 </body>
