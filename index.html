@@ -14,7 +14,7 @@
   --on-surface:#2d1b2e;--on-var:#7b5e7b;
   --outline:#e8c8d8;--outline-v:#f5d0e8;
   --bg:#fdf4f9;--white:#ffffff;
-  --tiktok:#ff2d55;--ig:#c2185b;--yt:#e53935;
+  --tiktok:#010101;--ig:#e1306c;--yt:#ff0000;
   --sh-sm:0 1px 3px rgba(194,24,91,.08),0 1px 2px rgba(156,39,176,.06);
   --sh-md:0 4px 16px rgba(194,24,91,.12),0 2px 6px rgba(156,39,176,.08);
   --sh-lg:0 8px 32px rgba(194,24,91,.16),0 4px 12px rgba(156,39,176,.10);
@@ -74,9 +74,9 @@ body{background:var(--bg);color:var(--on-surface);font-family:var(--body);min-he
 .s-card{background:var(--white);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm);border:1px solid var(--outline-v);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
 .s-card:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
 .s-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
-.s-card.tt::before{background:linear-gradient(90deg,#ff2d55,#ff6b8a)}
-.s-card.ig::before{background:linear-gradient(90deg,#c2185b,#e91e8c)}
-.s-card.yt::before{background:linear-gradient(90deg,#e53935,#ef9a9a)}
+.s-card.tt::before{background:linear-gradient(90deg,#010101,#434343)}
+.s-card.ig::before{background:linear-gradient(90deg,#833ab4,#e1306c,#fcaf45)}
+.s-card.yt::before{background:linear-gradient(90deg,#ff0000,#ff6b6b)}
 .s-icon{font-size:24px;margin-bottom:8px}
 .s-plat{font-size:11px;font-weight:700;color:var(--on-var);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
 .s-val{font-family:var(--disp);font-size:28px;font-weight:900}
@@ -98,8 +98,9 @@ body{background:var(--bg);color:var(--on-surface);font-family:var(--body);min-he
 .tbl-ttl{font-family:var(--disp);font-size:16px;font-weight:800;color:var(--on-surface)}
 .btn-add{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:var(--r-md);padding:12px 20px;font-family:var(--disp);font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(194,24,91,.25);transition:all .2s}
 .btn-add:hover{box-shadow:0 6px 18px rgba(194,24,91,.35);transform:translateY(-1px)}
+/* TABLE - desktop */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;min-width:780px}
+table{width:100%;border-collapse:collapse;min-width:700px}
 thead{background:var(--surface2)}
 th{padding:14px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;border-bottom:1px solid var(--outline)}
 td{padding:14px 16px;border-bottom:1px solid var(--outline-v);font-size:13px;font-weight:600;vertical-align:middle}
@@ -114,14 +115,28 @@ tbody tr:hover td{background:var(--surface)}
 .v-row{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
 .v-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .v-dot.tt{background:var(--tiktok)}.v-dot.ig{background:var(--ig)}.v-dot.yt{background:var(--yt)}
-.act-cell{display:flex;gap:6px}
+.act-cell{display:flex;gap:6px;flex-wrap:wrap}
 .btn-edit{background:var(--surface3);border:none;border-radius:var(--r-sm);padding:7px 12px;color:var(--secondary);font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
 .btn-edit:hover{background:var(--secondary);color:#fff}
-.btn-del{background:#fce4ec;border:none;border-radius:var(--r-sm);padding:7px 12px;color:var(--tiktok);font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
-.btn-del:hover{background:var(--tiktok);color:#fff}
+.btn-del{background:#fce4ec;border:none;border-radius:var(--r-sm);padding:7px 12px;color:#e53935;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-del:hover{background:#e53935;color:#fff}
 .empty-st{text-align:center;padding:60px 20px;color:var(--on-var)}
 .empty-ic{font-size:48px;margin-bottom:12px}
 .empty-tx{font-size:14px;font-weight:600}
+
+/* MOBILE TABLE → CARD STYLE */
+.post-cards{display:none;padding:12px;gap:10px;flex-direction:column}
+.post-card{background:var(--white);border:1px solid var(--outline-v);border-radius:var(--r-md);padding:16px;box-shadow:var(--sh-sm)}
+.pc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.pc-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pc-views{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.pc-view-item{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700}
+.pc-actions{display:flex;gap:8px}
+@media(max-width:640px){
+  .tbl-wrap{display:none}
+  thead{display:none}
+  .post-cards{display:flex}
+}
 
 /* OVERLAY & MODAL */
 .overlay{position:fixed;inset:0;background:rgba(45,27,46,.5);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -271,6 +286,7 @@ input[type=number]{-moz-appearance:textfield}
           <tbody id="tbody"><tr><td colspan="6"><div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Memuat data...</div></div></td></tr></tbody>
         </table>
       </div>
+      <div class="post-cards" id="post-cards"></div>
     </div>
   </div>
 </div>
@@ -432,7 +448,7 @@ function renderStats(data){
 // CHARTS
 const CI={};
 function dc(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
-const C={tt:'rgba(255,45,85,.85)',ttL:'rgba(255,45,85,.2)',ig:'rgba(194,24,91,.85)',igL:'rgba(194,24,91,.2)',yt:'rgba(229,57,53,.85)',ytL:'rgba(229,57,53,.2)'};
+const C={tt:'rgba(1,1,1,.85)',ttL:'rgba(1,1,1,.15)',ig:'rgba(225,48,108,.85)',igL:'rgba(225,48,108,.2)',yt:'rgba(255,0,0,.85)',ytL:'rgba(255,0,0,.2)'};
 
 function renderCharts(data){
   // TREND
@@ -466,11 +482,19 @@ function renderCharts(data){
   }
 }
 
-// TABLE
+// TABLE + MOBILE CARDS
 function renderTable(data){
   const tb=document.getElementById('tbody');
+  const cards=document.getElementById('post-cards');
   const sorted=[...data].sort((a,b)=>{if(b.tanggal>a.tanggal)return 1;if(b.tanggal<a.tanggal)return-1;return(a.nomor||0)-(b.nomor||0);});
-  if(!sorted.length){tb.innerHTML=`<tr><td colspan="6"><div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Belum ada data. Yuk tambah post pertama!</div></div></td></tr>`;return;}
+
+  if(!sorted.length){
+    tb.innerHTML=`<tr><td colspan="6"><div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Belum ada data. Yuk tambah post pertama!</div></div></td></tr>`;
+    cards.innerHTML=`<div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Belum ada data. Yuk tambah post pertama!</div></div>`;
+    return;
+  }
+
+  // Desktop table rows
   tb.innerHTML=sorted.map(r=>`<tr>
     <td><span class="badge-no">${r.nomor||'?'}</span></td>
     <td><span class="chip-date">${fmtD(r.tanggal)}</span></td>
@@ -479,6 +503,29 @@ function renderTable(data){
     <td><div class="v-cell"><div class="v-row"><span class="v-dot tt"></span>${fmtV(r.views_tiktok)}</div><div class="v-row"><span class="v-dot ig"></span>${fmtV(r.views_instagram)}</div><div class="v-row"><span class="v-dot yt"></span>${fmtV(r.views_youtube)}</div></div></td>
     <td><div class="act-cell"><button class="btn-edit" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button><button class="btn-del" onclick="delPost('${r.id}')">🗑️ Hapus</button></div></td>
   </tr>`).join('');
+
+  // Mobile cards
+  cards.innerHTML=sorted.map(r=>`
+    <div class="post-card">
+      <div class="pc-top">
+        <div class="pc-meta">
+          <span class="badge-no">${r.nomor||'?'}</span>
+          <span class="chip-date">${fmtD(r.tanggal)}</span>
+          <span class="chip-time">${r.jam_upload||'—'}</span>
+        </div>
+        <button class="code-btn" onclick='openLinks(${JSON.stringify(r).replace(/'/g,"&#39;")})'>${r.kode_video||'—'}</button>
+      </div>
+      <div class="pc-views">
+        <div class="pc-view-item"><span class="v-dot tt"></span><span style="color:var(--tiktok)">TT</span> ${fmtV(r.views_tiktok)}</div>
+        <div class="pc-view-item"><span class="v-dot ig"></span><span style="color:var(--ig)">IG</span> ${fmtV(r.views_instagram)}</div>
+        <div class="pc-view-item"><span class="v-dot yt"></span><span style="color:var(--yt)">YT</span> ${fmtV(r.views_youtube)}</div>
+      </div>
+      <div class="pc-actions">
+        <button class="btn-edit" style="flex:1" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button>
+        <button class="btn-del" style="flex:1" onclick="delPost('${r.id}')">🗑️ Hapus</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 // LINKS POPUP
@@ -582,6 +629,15 @@ document.getElementById('m-save').addEventListener('click',async()=>{
   if(error){showToast('Gagal menyimpan: '+error.message,'err');return;}
   showToast(editId?'Post berhasil diperbarui! ✨':'Post berhasil ditambahkan! 🎉');
   closePost();loadAll();
+});
+
+// Fix chart resize bug on orientation change
+let resizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    Object.values(CI).forEach(c=>c.resize());
+  },200);
 });
 
 // DELETE
