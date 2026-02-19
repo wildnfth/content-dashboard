@@ -68,6 +68,24 @@ body{background:var(--bg);color:var(--on-surface);font-family:var(--body);min-he
 .main{padding:20px;max-width:1400px;margin:0 auto}
 .sec-lbl{font-family:var(--disp);font-size:13px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;margin-top:24px}
 
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;background:var(--white);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--sh-sm);border:1px solid var(--outline-v)}
+.filter-lbl{font-size:11px;font-weight:800;color:var(--on-var);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;margin-right:4px}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.fp{background:var(--surface2);border:2px solid transparent;border-radius:40px;padding:7px 16px;font-family:var(--body);font-size:12px;font-weight:700;color:var(--on-var);cursor:pointer;transition:all .2s;white-space:nowrap}
+.fp:hover{border-color:var(--primary);color:var(--primary)}
+.fp.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(194,24,91,.25)}
+.filter-custom{display:none;align-items:center;gap:8px;flex-wrap:wrap;width:100%;margin-top:8px;padding-top:8px;border-top:1px solid var(--outline-v)}
+.filter-custom.show{display:flex}
+.filter-custom input[type=date]{background:var(--surface);border:2px solid var(--outline);border-radius:var(--r-sm);padding:8px 12px;color:var(--on-surface);font-family:var(--body);font-size:13px;font-weight:600;outline:none;transition:border-color .2s;flex:1;min-width:130px}
+.filter-custom input[type=date]:focus{border-color:var(--primary)}
+.filter-sep{font-size:12px;color:var(--on-var);font-weight:700}
+.btn-apply{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:var(--r-sm);padding:9px 18px;font-family:var(--disp);font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(194,24,91,.2);white-space:nowrap}
+.btn-apply:hover{box-shadow:0 4px 12px rgba(194,24,91,.35)}
+.filter-info{font-size:11px;color:var(--on-var);font-weight:600;margin-left:auto;white-space:nowrap}
+@media(max-width:480px){.filter-info{width:100%;margin-left:0}}
+
 /* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px}
 @media(max-width:640px){.stats-row{grid-template-columns:1fr}}
@@ -90,7 +108,8 @@ body{background:var(--bg);color:var(--on-surface);font-family:var(--body);min-he
 .c-card{background:var(--white);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm);border:1px solid var(--outline-v)}
 .c-title{font-family:var(--disp);font-size:14px;font-weight:800;color:var(--on-surface);margin-bottom:4px}
 .c-sub{font-size:11px;color:var(--on-var);margin-bottom:16px}
-.c-wrap{position:relative;height:220px}.c-wrap.tall{height:280px}
+.c-wrap{position:relative;height:220px;width:100%;overflow:hidden}.c-wrap.tall{height:280px}
+canvas{max-width:100%;}
 
 /* TABLE */
 .tbl-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-sm);border:1px solid var(--outline-v);overflow:hidden}
@@ -236,6 +255,23 @@ input[type=number]{-moz-appearance:textfield}
   </div>
   <div class="main">
     <div class="sec-lbl">📊 Ringkasan Total Views</div>
+    <div class="filter-bar">
+      <span class="filter-lbl">📅 Periode</span>
+      <div class="filter-pills">
+        <button class="fp active" data-period="all">Semua</button>
+        <button class="fp" data-period="7d">7 Hari</button>
+        <button class="fp" data-period="30d">30 Hari</button>
+        <button class="fp" data-period="1y">1 Tahun</button>
+        <button class="fp" data-period="custom">Rentang</button>
+      </div>
+      <span class="filter-info" id="filter-info"></span>
+      <div class="filter-custom" id="filter-custom">
+        <input type="date" id="f-dari" placeholder="Dari"/>
+        <span class="filter-sep">—</span>
+        <input type="date" id="f-sampai" placeholder="Sampai"/>
+        <button class="btn-apply" id="btn-apply">Terapkan</button>
+      </div>
+    </div>
     <div class="stats-row">
       <div class="s-card tt"><div class="s-icon">🎵</div><div class="s-plat">TikTok</div><div class="s-val" id="sv-tt">0</div><div class="s-sub">total views</div></div>
       <div class="s-card ig"><div class="s-icon">📸</div><div class="s-plat">Instagram</div><div class="s-val" id="sv-ig">0</div><div class="s-sub">total views</div></div>
@@ -325,6 +361,11 @@ const nowTime=()=>{const d=new Date();return`${p2(d.getHours())}:${p2(d.getMinut
 const todayStr=()=>new Date().toISOString().split('T')[0];
 function fmtV(n){if(n==null||n===''||isNaN(n))return'—';n=parseInt(n);if(n>=1000000)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString('id-ID');}
 function fmtD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+function ensureUrl(v){
+  if(!v) return null;
+  if(/^https?:\/\//i.test(v)) return v;
+  return 'https://'+v;
+}
 function showToast(msg,type='ok'){const el=document.getElementById('toast');el.innerHTML=`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`;el.className=`toast show ${type}`;setTimeout(()=>el.className='toast',3000);}
 
 // AUTH HELPERS
@@ -370,13 +411,42 @@ sb.auth.onAuthStateChange((ev,session)=>{
 
 // DATA
 let allPosts=[];
+let currentPeriod='all';
+let customFrom=null, customTo=null;
+
+function getFilteredPosts(){
+  const now=new Date(); now.setHours(23,59,59,999);
+  let from=null;
+  if(currentPeriod==='7d'){from=new Date(now);from.setDate(from.getDate()-6);from.setHours(0,0,0,0);}
+  else if(currentPeriod==='30d'){from=new Date(now);from.setDate(from.getDate()-29);from.setHours(0,0,0,0);}
+  else if(currentPeriod==='1y'){from=new Date(now);from.setFullYear(from.getFullYear()-1);from.setHours(0,0,0,0);}
+  else if(currentPeriod==='custom'&&customFrom&&customTo){
+    from=new Date(customFrom+'T00:00:00');
+    now.setTime(new Date(customTo+'T23:59:59').getTime());
+  }
+  if(!from) return allPosts;
+  return allPosts.filter(p=>{
+    if(!p.tanggal) return false;
+    const d=new Date(p.tanggal+'T00:00:00');
+    return d>=from && d<=now;
+  });
+}
+
+function applyDisplay(){
+  const filtered=getFilteredPosts();
+  renderStats(filtered);
+  renderCharts(filtered);
+  renderTable(filtered);
+  // Update info label
+  const info=document.getElementById('filter-info');
+  if(currentPeriod==='all') info.textContent=`${allPosts.length} post`;
+  else info.textContent=`${filtered.length} dari ${allPosts.length} post`;
+}
 async function loadAll(){
   const{data,error}=await sb.from('posts').select('*').order('tanggal',{ascending:true}).order('nomor',{ascending:true});
   if(error){showToast('Gagal memuat data','err');return;}
   allPosts=data||[];
-  renderTable(allPosts);
-  renderStats(allPosts);
-  renderCharts(allPosts);
+  applyDisplay();
 }
 
 async function getNextNomor(tanggal,excludeId=null){
@@ -396,7 +466,15 @@ function renderStats(data){
 
 // CHARTS
 const CI={};
-function dc(id){if(CI[id]){CI[id].destroy();delete CI[id];}}
+function dc(id){
+  if(CI[id]){
+    CI[id].destroy();
+    delete CI[id];
+  }
+  // Reset canvas so Chart.js re-measures from container on next draw
+  const canvas=document.getElementById(id);
+  if(canvas){canvas.width=0;canvas.height=0;canvas.style.width='';canvas.style.height='';}
+}
 const C={tt:'rgba(1,1,1,.85)',ttL:'rgba(1,1,1,.15)',ig:'rgba(225,48,108,.85)',igL:'rgba(225,48,108,.2)',yt:'rgba(255,0,0,.85)',ytL:'rgba(255,0,0,.2)'};
 
 function renderCharts(data){
@@ -562,9 +640,9 @@ document.getElementById('m-save').addEventListener('click',async()=>{
     tanggal,nomor,
     jam_upload:document.getElementById('f-jam').value||null,
     kode_video:kode,
-    link_tiktok:document.getElementById('f-tt').value.trim()||null,
-    link_instagram:document.getElementById('f-ig').value.trim()||null,
-    link_youtube:document.getElementById('f-yt').value.trim()||null,
+    link_tiktok:ensureUrl(document.getElementById('f-tt').value.trim()),
+    link_instagram:ensureUrl(document.getElementById('f-ig').value.trim()),
+    link_youtube:ensureUrl(document.getElementById('f-yt').value.trim()),
     views_tiktok:parseInt(document.getElementById('f-vtt').value)||0,
     views_instagram:parseInt(document.getElementById('f-vig').value)||0,
     views_youtube:parseInt(document.getElementById('f-vyt').value)||0,
@@ -580,14 +658,49 @@ document.getElementById('m-save').addEventListener('click',async()=>{
   closePost();loadAll();
 });
 
-// Fix chart resize - destroy & redraw on orientation change
+
+// FILTER PILLS
+document.querySelectorAll('.fp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.fp').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPeriod=btn.dataset.period;
+    const customEl=document.getElementById('filter-custom');
+    if(currentPeriod==='custom'){
+      customEl.classList.add('show');
+      // Set default: last 30 days
+      if(!customFrom){
+        const d=new Date(); d.setDate(d.getDate()-29);
+        document.getElementById('f-dari').value=d.toISOString().split('T')[0];
+        document.getElementById('f-sampai').value=todayStr();
+        customFrom=document.getElementById('f-dari').value;
+        customTo=document.getElementById('f-sampai').value;
+      }
+    } else {
+      customEl.classList.remove('show');
+      applyDisplay();
+    }
+  });
+});
+
+document.getElementById('btn-apply').addEventListener('click',()=>{
+  const dari=document.getElementById('f-dari').value;
+  const sampai=document.getElementById('f-sampai').value;
+  if(!dari||!sampai){showToast('Isi rentang tanggal dulu ya!','err');return;}
+  if(dari>sampai){showToast('Tanggal awal harus sebelum tanggal akhir','err');return;}
+  customFrom=dari; customTo=sampai;
+  applyDisplay();
+});
+
+// Fix chart resize on orientation change
+// Portrait needs longer delay — browser hasn't finished reflowing when resize fires
 let resizeTimer;
-function onResize(){
+window.addEventListener("resize",()=>{
   clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(()=>{ if(allPosts.length) renderCharts(allPosts); },350);
-}
-window.addEventListener("resize", onResize);
-if(screen.orientation) screen.orientation.addEventListener("change",()=>setTimeout(()=>{ if(allPosts.length) renderCharts(allPosts); },400));
+  resizeTimer=setTimeout(()=>{
+    if(allPosts.length) renderCharts(getFilteredPosts());
+  },300);
+});
 
 // DELETE
 async function delPost(id){
