@@ -349,7 +349,7 @@ function switchTab(t){
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈';}else{i.type='password';btn.textContent='👁️';}}
 function showErr(msg){const e=document.getElementById('auth-err');e.textContent=msg;e.style.display='block';document.getElementById('auth-ok').style.display='none';}
 function showOk(msg){const e=document.getElementById('auth-ok');e.textContent=msg;e.style.display='block';document.getElementById('auth-err').style.display='none';}
-const uToEmail=u=>`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@tokomaslia.com`;
+const uToEmail=u=>`${u.toLowerCase().replace(/[^a-z0-9]/g,'_')}@proton.me`;
 
 // LOGIN
 document.getElementById('btn-login').addEventListener('click',async()=>{
