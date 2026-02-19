@@ -202,10 +202,6 @@ input[type=number]{-moz-appearance:textfield}
     <div class="auth-deco">💎</div>
     <div class="auth-title">Content Dashboard</div>
     <div class="auth-sub">Toko Mas Lia ✨</div>
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-masuk" onclick="switchTab('masuk')">Masuk</button>
-      <button class="tab-btn" id="tab-daftar" onclick="switchTab('daftar')">Daftar</button>
-    </div>
     <!-- LOGIN -->
     <div id="form-masuk">
       <div class="form-group">
@@ -220,28 +216,6 @@ input[type=number]{-moz-appearance:textfield}
         </div>
       </div>
       <button class="btn-primary" id="btn-login">Masuk →</button>
-    </div>
-    <!-- REGISTER -->
-    <div id="form-daftar" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Username</label>
-        <input type="text" id="r-user" class="form-input" placeholder="pilih username unik" autocomplete="username"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <div class="input-wrap">
-          <input type="password" id="r-pw" class="form-input pi" placeholder="min. 6 karakter" autocomplete="new-password"/>
-          <button class="eye-btn" type="button" onclick="togglePw('r-pw',this)">👁️</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Konfirmasi Password</label>
-        <div class="input-wrap">
-          <input type="password" id="r-pw2" class="form-input pi" placeholder="ulangi password" autocomplete="new-password"/>
-          <button class="eye-btn" type="button" onclick="togglePw('r-pw2',this)">👁️</button>
-        </div>
-      </div>
-      <button class="btn-primary" id="btn-register">Buat Akun ✨</button>
     </div>
     <div class="auth-msg auth-err" id="auth-err"></div>
     <div class="auth-msg auth-ok" id="auth-ok"></div>
@@ -354,14 +328,6 @@ function fmtD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateSt
 function showToast(msg,type='ok'){const el=document.getElementById('toast');el.innerHTML=`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`;el.className=`toast show ${type}`;setTimeout(()=>el.className='toast',3000);}
 
 // AUTH HELPERS
-function switchTab(t){
-  document.getElementById('form-masuk').style.display=t==='masuk'?'block':'none';
-  document.getElementById('form-daftar').style.display=t==='daftar'?'block':'none';
-  document.getElementById('tab-masuk').className='tab-btn'+(t==='masuk'?' active':'');
-  document.getElementById('tab-daftar').className='tab-btn'+(t==='daftar'?' active':'');
-  document.getElementById('auth-err').style.display='none';
-  document.getElementById('auth-ok').style.display='none';
-}
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈';}else{i.type='password';btn.textContent='👁️';}}
 function showErr(msg){const e=document.getElementById('auth-err');e.textContent=msg;e.style.display='block';document.getElementById('auth-ok').style.display='none';}
 function showOk(msg){const e=document.getElementById('auth-ok');e.textContent=msg;e.style.display='block';document.getElementById('auth-err').style.display='none';}
@@ -382,23 +348,6 @@ document.getElementById('btn-login').addEventListener('click',async()=>{
 document.getElementById('l-pw').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btn-login').click();});
 
 // REGISTER
-document.getElementById('btn-register').addEventListener('click',async()=>{
-  const u=document.getElementById('r-user').value.trim();
-  const p=document.getElementById('r-pw').value;
-  const p2=document.getElementById('r-pw2').value;
-  document.getElementById('auth-err').style.display='none';
-  if(!u){showErr('Username wajib diisi.');return;}
-  if(u.length<3){showErr('Username minimal 3 karakter.');return;}
-  if(p.length<6){showErr('Password minimal 6 karakter.');return;}
-  if(p!==p2){showErr('Konfirmasi password tidak sama.');return;}
-  const btn=document.getElementById('btn-register');
-  btn.disabled=true;btn.textContent='Mendaftar...';
-  const{error}=await sb.auth.signUp({email:uToEmail(u),password:p,options:{data:{username:u}}});
-  btn.disabled=false;btn.textContent='Buat Akun ✨';
-  if(error){showErr('Gagal mendaftar: '+error.message);return;}
-  showOk('Akun berhasil dibuat! Silakan masuk.');
-  setTimeout(()=>switchTab('masuk'),1500);
-});
 
 // LOGOUT
 document.getElementById('btn-out').addEventListener('click',()=>sb.auth.signOut());
@@ -631,14 +580,14 @@ document.getElementById('m-save').addEventListener('click',async()=>{
   closePost();loadAll();
 });
 
-// Fix chart resize bug on orientation change
+// Fix chart resize - destroy & redraw on orientation change
 let resizeTimer;
-window.addEventListener('resize',()=>{
+function onResize(){
   clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(()=>{
-    Object.values(CI).forEach(c=>c.resize());
-  },200);
-});
+  resizeTimer=setTimeout(()=>{ if(allPosts.length) renderCharts(allPosts); },350);
+}
+window.addEventListener("resize", onResize);
+if(screen.orientation) screen.orientation.addEventListener("change",()=>setTimeout(()=>{ if(allPosts.length) renderCharts(allPosts); },400));
 
 // DELETE
 async function delPost(id){
