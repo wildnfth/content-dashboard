@@ -87,6 +87,20 @@
         <div class="tbl-ttl">Semua Post</div>
         <button class="btn-add" id="btn-add">＋ Tambah Post</button>
       </div>
+      <div class="tbl-filter-bar" id="tbl-filter-bar">
+        <div class="tbl-filter-pills">
+          <button class="tfp active" data-tfilter="week">Minggu Ini</button>
+          <button class="tfp" data-tfilter="today">Hari Ini</button>
+          <button class="tfp" data-tfilter="all">Semua</button>
+          <button class="tfp" data-tfilter="range">Pilih Tanggal</button>
+        </div>
+        <div class="tbl-range-row" id="tbl-range-row">
+          <input type="date" id="tbl-dari" class="tbl-date-input"/>
+          <span class="filter-sep">—</span>
+          <input type="date" id="tbl-sampai" class="tbl-date-input"/>
+          <button class="btn-apply" id="tbl-apply">Terapkan</button>
+        </div>
+      </div>
       <div class="prefix-bar hidden" id="prefix-bar">
         <span class="prefix-lbl">🏷️ Seri</span>
         <button class="pfp active" data-prefix="all">Semua</button>
@@ -98,6 +112,7 @@
         </table>
       </div>
       <div class="post-cards" id="post-cards"></div>
+      <div class="tbl-pagination" id="tbl-pagination"></div>
     </div>
   </div>
 </div>
