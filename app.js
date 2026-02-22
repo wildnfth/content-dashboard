@@ -106,6 +106,46 @@ let allPosts=[];
 let currentPeriod='month';
 let activePrefix='all'; // prefix filter for table only (not charts/stats)
 
+// TABLE-SPECIFIC FILTER + PAGINATION
+let tblFilter='week';      // 'week' | 'today' | 'all' | 'range'
+let tblFrom=null;          // string YYYY-MM-DD, for range mode
+let tblTo=null;
+let tblPage=0;             // current page index (0-based)
+const TBL_PAGE_DAYS=7;     // 7 days per page
+
+function getTblFilteredPosts(basePosts){
+  const today=todayStr();
+  if(tblFilter==='today'){
+    return basePosts.filter(p=>p.tanggal===today);
+  }
+  if(tblFilter==='all'){
+    return basePosts;
+  }
+  if(tblFilter==='range'&&tblFrom&&tblTo){
+    return basePosts.filter(p=>p.tanggal>=tblFrom&&p.tanggal<=tblTo);
+  }
+  // 'week' — paginated by 7-day windows, newest first
+  const sorted=[...basePosts].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(!sorted.length) return [];
+  const newestDate=sorted[0].tanggal;
+  const endDate=new Date(newestDate+'T00:00:00');
+  endDate.setDate(endDate.getDate()-(tblPage*TBL_PAGE_DAYS));
+  const startDate=new Date(endDate);
+  startDate.setDate(startDate.getDate()-(TBL_PAGE_DAYS-1));
+  const endStr=endDate.toISOString().split('T')[0];
+  const startStr=startDate.toISOString().split('T')[0];
+  return basePosts.filter(p=>p.tanggal>=startStr&&p.tanggal<=endStr);
+}
+
+function getTblTotalPages(basePosts){
+  const sorted=[...basePosts].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  if(!sorted.length) return 1;
+  const newestDate=sorted[0].tanggal;
+  const oldestDate=sorted[sorted.length-1].tanggal;
+  const diffDays=Math.ceil((new Date(newestDate+'T00:00:00')-new Date(oldestDate+'T00:00:00'))/(1000*60*60*24))+1;
+  return Math.max(1,Math.ceil(diffDays/TBL_PAGE_DAYS));
+}
+
 function extractPrefix(kode){
   // Extract leading letters from kode, e.g. 'SPL1' → 'SPL', 'TESTI3' → 'TESTI'
   if(!kode) return null;
@@ -161,19 +201,19 @@ function applyDisplay(){
   renderStats(filtered);
   renderCharts(filtered);
   renderPrefixFilter(filtered);
-  // Apply prefix filter for table only
-  const tableData = activePrefix==='all'
+  // Apply prefix filter then table date filter
+  const prefixed = activePrefix==='all'
     ? filtered
     : filtered.filter(p=>extractPrefix(p.kode_video)===activePrefix);
-  renderTable(tableData);
-  // Update info label
+  const tableData = getTblFilteredPosts(prefixed);
+  renderTable(tableData, prefixed);
+  // Update info label (stats area)
   const info=document.getElementById('filter-info');
   const monthNames=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
   const now2=new Date();
-  const tableData2 = activePrefix==='all' ? filtered : filtered.filter(p=>extractPrefix(p.kode_video)===activePrefix);
-  if(currentPeriod==='all') info.textContent=`${tableData2.length} post`;
-  else if(currentPeriod==='month') info.textContent=`${monthNames[now2.getMonth()]} ${now2.getFullYear()} · ${tableData2.length} post`;
-  else info.textContent=`${tableData2.length} dari ${allPosts.length} post`;
+  if(currentPeriod==='all') info.textContent=`${prefixed.length} post`;
+  else if(currentPeriod==='month') info.textContent=`${monthNames[now2.getMonth()]} ${now2.getFullYear()} · ${prefixed.length} post`;
+  else info.textContent=`${prefixed.length} dari ${allPosts.length} post`;
 }
 async function loadAll(){
   const{data,error}=await sb.from('posts').select('*').order('tanggal',{ascending:true}).order('nomor',{ascending:true});
@@ -261,7 +301,32 @@ function incompleteHints(r){
   return hints.join(', ');
 }
 
-function renderTable(data){
+function renderPagination(basePosts){
+  const pg=document.getElementById('tbl-pagination');
+  if(!pg) return;
+  // Only show pagination in 'week' mode
+  if(tblFilter!=='week'){pg.innerHTML='';return;}
+  const total=getTblTotalPages(basePosts);
+  if(total<=1){pg.innerHTML='';return;}
+  let html=`<div class="pg-wrap">`;
+  html+=`<button class="pg-btn" onclick="tblPageGo(${tblPage-1})" ${tblPage===0?'disabled':''}>‹</button>`;
+  for(let i=0;i<total;i++){
+    html+=`<button class="pg-btn ${i===tblPage?'pg-active':''}" onclick="tblPageGo(${i})">${i+1}</button>`;
+  }
+  html+=`<button class="pg-btn" onclick="tblPageGo(${tblPage+1})" ${tblPage>=total-1?'disabled':''}>›</button>`;
+  html+=`</div>`;
+  pg.innerHTML=html;
+}
+
+function tblPageGo(page){
+  const total=getTblTotalPages(activePrefix==='all'?getFilteredPosts():getFilteredPosts().filter(p=>extractPrefix(p.kode_video)===activePrefix));
+  if(page<0||page>=total) return;
+  tblPage=page;
+  applyDisplay();
+  document.getElementById('tbody').closest('.tbl-card')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderTable(data, basePosts=[]){
   const tb=document.getElementById('tbody');
   const cards=document.getElementById('post-cards');
   // Terbaru di atas: sort tanggal descending, lalu nomor descending
@@ -320,6 +385,8 @@ function renderTable(data){
       </div>
     </div>
   `;}).join('');
+
+  renderPagination(basePosts);
 }
 
 // LINKS POPUP
@@ -428,6 +495,37 @@ document.getElementById('m-save').addEventListener('click',async()=>{
   document.getElementById('tbody').closest('.tbl-card')?.scrollIntoView({behavior:'smooth',block:'start'});
 });
 
+
+// TABLE FILTER PILLS
+document.querySelectorAll('.tfp').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tfp').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    tblFilter=btn.dataset.tfilter;
+    tblPage=0;
+    const rangeRow=document.getElementById('tbl-range-row');
+    if(tblFilter==='range'){
+      rangeRow.classList.add('show');
+      if(!tblFrom){
+        document.getElementById('tbl-dari').value=todayStr();
+        document.getElementById('tbl-sampai').value=todayStr();
+        tblFrom=todayStr(); tblTo=todayStr();
+      }
+    } else {
+      rangeRow.classList.remove('show');
+      applyDisplay();
+    }
+  });
+});
+
+document.getElementById('tbl-apply').addEventListener('click',()=>{
+  const dari=document.getElementById('tbl-dari').value;
+  const sampai=document.getElementById('tbl-sampai').value;
+  if(!dari||!sampai){showToast('Isi rentang tanggal dulu ya!','err');return;}
+  if(dari>sampai){showToast('Tanggal awal harus sebelum tanggal akhir','err');return;}
+  tblFrom=dari; tblTo=sampai; tblPage=0;
+  applyDisplay();
+});
 
 // FILTER PILLS
 document.querySelectorAll('.fp').forEach(btn=>{
