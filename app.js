@@ -243,10 +243,29 @@ function renderCharts(data){
 }
 
 // TABLE + MOBILE CARDS
+function isIncomplete(r){
+  // Cek apakah ada field penting yang belum diisi
+  const missingLink = !r.link_tiktok || !r.link_instagram || !r.link_youtube;
+  const missingViews = !(parseInt(r.views_tiktok)>0) || !(parseInt(r.views_instagram)>0) || !(parseInt(r.views_youtube)>0);
+  return missingLink || missingViews;
+}
+
+function incompleteHints(r){
+  const hints=[];
+  if(!r.link_tiktok) hints.push('Link TT');
+  if(!r.link_instagram) hints.push('Link IG');
+  if(!r.link_youtube) hints.push('Link YT');
+  if(!(parseInt(r.views_tiktok)>0)) hints.push('Views TT');
+  if(!(parseInt(r.views_instagram)>0)) hints.push('Views IG');
+  if(!(parseInt(r.views_youtube)>0)) hints.push('Views YT');
+  return hints.join(', ');
+}
+
 function renderTable(data){
   const tb=document.getElementById('tbody');
   const cards=document.getElementById('post-cards');
-  const sorted=[...data].sort((a,b)=>{if(b.tanggal>a.tanggal)return 1;if(b.tanggal<a.tanggal)return-1;return(a.nomor||0)-(b.nomor||0);});
+  // Terbaru di atas: sort tanggal descending, lalu nomor descending
+  const sorted=[...data].sort((a,b)=>{if(b.tanggal>a.tanggal)return 1;if(b.tanggal<a.tanggal)return-1;return(b.nomor||0)-(a.nomor||0);});
 
   if(!sorted.length){
     tb.innerHTML=`<tr><td colspan="6"><div class="empty-st"><div class="empty-ic">🌸</div><div class="empty-tx">Belum ada data. Yuk tambah post pertama!</div></div></td></tr>`;
@@ -255,18 +274,32 @@ function renderTable(data){
   }
 
   // Desktop table rows
-  tb.innerHTML=sorted.map(r=>`<tr>
+  tb.innerHTML=sorted.map(r=>{
+    const inc=isIncomplete(r);
+    const hints=inc?incompleteHints(r):'';
+    return `<tr class="${inc?'row-incomplete':''}">
     <td><span class="badge-no">${r.nomor||'?'}</span></td>
     <td><span class="chip-date">${fmtD(r.tanggal)}</span></td>
     <td><span class="chip-time">${r.jam_upload||'—'}</span></td>
-    <td><button class="code-btn" onclick='openLinks(${JSON.stringify(r).replace(/'/g,"&#39;")})'>${r.kode_video||'—'}</button></td>
-    <td><div class="v-cell"><div class="v-row"><span class="v-dot tt"></span>${fmtV(r.views_tiktok)}</div><div class="v-row"><span class="v-dot ig"></span>${fmtV(r.views_instagram)}</div><div class="v-row"><span class="v-dot yt"></span>${fmtV(r.views_youtube)}</div></div></td>
+    <td>
+      <button class="code-btn" onclick='openLinks(${JSON.stringify(r).replace(/'/g,"&#39;")})'>${r.kode_video||'—'}</button>
+      ${inc?`<span class="badge-incomplete" title="Belum lengkap: ${hints}">⚠️ Belum lengkap</span>`:''}
+    </td>
+    <td><div class="v-cell">
+      <div class="v-row ${!(parseInt(r.views_tiktok)>0)?'v-empty':''}"><span class="v-dot tt"></span>${fmtV(r.views_tiktok)}</div>
+      <div class="v-row ${!(parseInt(r.views_instagram)>0)?'v-empty':''}"><span class="v-dot ig"></span>${fmtV(r.views_instagram)}</div>
+      <div class="v-row ${!(parseInt(r.views_youtube)>0)?'v-empty':''}"><span class="v-dot yt"></span>${fmtV(r.views_youtube)}</div>
+    </div></td>
     <td><div class="act-cell"><button class="btn-edit" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button><button class="btn-del" onclick="delPost('${r.id}')">🗑️ Hapus</button></div></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 
   // Mobile cards
-  cards.innerHTML=sorted.map(r=>`
-    <div class="post-card">
+  cards.innerHTML=sorted.map(r=>{
+    const inc=isIncomplete(r);
+    const hints=inc?incompleteHints(r):'';
+    return `
+    <div class="post-card ${inc?'card-incomplete':''}">
       <div class="pc-top">
         <div class="pc-meta">
           <span class="badge-no">${r.nomor||'?'}</span>
@@ -275,17 +308,18 @@ function renderTable(data){
         </div>
         <button class="code-btn" onclick='openLinks(${JSON.stringify(r).replace(/'/g,"&#39;")})'>${r.kode_video||'—'}</button>
       </div>
+      ${inc?`<div class="card-incomplete-hint">⚠️ Belum lengkap: ${hints}</div>`:''}
       <div class="pc-views">
-        <div class="pc-view-item"><span class="v-dot tt"></span><span style="color:var(--tiktok)">TT</span> ${fmtV(r.views_tiktok)}</div>
-        <div class="pc-view-item"><span class="v-dot ig"></span><span style="color:var(--ig)">IG</span> ${fmtV(r.views_instagram)}</div>
-        <div class="pc-view-item"><span class="v-dot yt"></span><span style="color:var(--yt)">YT</span> ${fmtV(r.views_youtube)}</div>
+        <div class="pc-view-item ${!(parseInt(r.views_tiktok)>0)?'v-empty':''}"><span class="v-dot tt"></span><span style="color:var(--tiktok)">TT</span> ${fmtV(r.views_tiktok)}</div>
+        <div class="pc-view-item ${!(parseInt(r.views_instagram)>0)?'v-empty':''}"><span class="v-dot ig"></span><span style="color:var(--ig)">IG</span> ${fmtV(r.views_instagram)}</div>
+        <div class="pc-view-item ${!(parseInt(r.views_youtube)>0)?'v-empty':''}"><span class="v-dot yt"></span><span style="color:var(--yt)">YT</span> ${fmtV(r.views_youtube)}</div>
       </div>
       <div class="pc-actions">
         <button class="btn-edit" style="flex:1" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button>
         <button class="btn-del" style="flex:1" onclick="delPost('${r.id}')">🗑️ Hapus</button>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 
 // LINKS POPUP
