@@ -210,3 +210,52 @@ tbody tr:hover td{background:var(--surface)}
 
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 input[type=number]{-moz-appearance:textfield}
+/* ── INCOMPLETE ROW / CARD ── */
+tr.row-incomplete td {
+  background: #fffbf0;
+}
+tr.row-incomplete:hover td {
+  background: #fff5d6 !important;
+}
+tr.row-incomplete td:first-child {
+  border-left: 3px solid #f59e0b;
+}
+
+.badge-incomplete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef3c7;
+  border: 1.5px solid #f59e0b;
+  color: #92400e;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  margin-left: 6px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.v-row.v-empty,
+.pc-view-item.v-empty {
+  opacity: 0.4;
+}
+
+/* Mobile card incomplete */
+.post-card.card-incomplete {
+  border-color: #f59e0b;
+  border-width: 2px;
+  background: #fffbf0;
+}
+
+.card-incomplete-hint {
+  background: #fef3c7;
+  border: 1.5px solid #f59e0b;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 10px;
+}
