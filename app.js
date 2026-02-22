@@ -115,9 +115,16 @@ const TBL_PAGE_SIZE=15;    // posts per page
 
 function getTblDateFiltered(basePosts){
   const today=todayStr();
-  if(tblFilter==='today') return basePosts.filter(p=>p.tanggal===today);
-  if(tblFilter==='range'&&tblFrom&&tblTo) return basePosts.filter(p=>p.tanggal>=tblFrom&&p.tanggal<=tblTo);
-  return basePosts; // 'all'
+  let filtered;
+  if(tblFilter==='today') filtered=basePosts.filter(p=>p.tanggal===today);
+  else if(tblFilter==='range'&&tblFrom&&tblTo) filtered=basePosts.filter(p=>p.tanggal>=tblFrom&&p.tanggal<=tblTo);
+  else filtered=[...basePosts];
+  // Sort descending dulu — page 1 = post terbaru
+  return filtered.sort((a,b)=>{
+    if(b.tanggal>a.tanggal) return 1;
+    if(b.tanggal<a.tanggal) return -1;
+    return (b.nomor||0)-(a.nomor||0);
+  });
 }
 
 function getTblFilteredPosts(basePosts){
