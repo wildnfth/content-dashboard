@@ -107,43 +107,28 @@ let currentPeriod='month';
 let activePrefix='all'; // prefix filter for table only (not charts/stats)
 
 // TABLE-SPECIFIC FILTER + PAGINATION
-let tblFilter='week';      // 'week' | 'today' | 'all' | 'range'
+let tblFilter='all';       // 'today' | 'all' | 'range'
 let tblFrom=null;          // string YYYY-MM-DD, for range mode
 let tblTo=null;
 let tblPage=0;             // current page index (0-based)
-const TBL_PAGE_DAYS=7;     // 7 days per page
+const TBL_PAGE_SIZE=15;    // posts per page
+
+function getTblDateFiltered(basePosts){
+  const today=todayStr();
+  if(tblFilter==='today') return basePosts.filter(p=>p.tanggal===today);
+  if(tblFilter==='range'&&tblFrom&&tblTo) return basePosts.filter(p=>p.tanggal>=tblFrom&&p.tanggal<=tblTo);
+  return basePosts; // 'all'
+}
 
 function getTblFilteredPosts(basePosts){
-  const today=todayStr();
-  if(tblFilter==='today'){
-    return basePosts.filter(p=>p.tanggal===today);
-  }
-  if(tblFilter==='all'){
-    return basePosts;
-  }
-  if(tblFilter==='range'&&tblFrom&&tblTo){
-    return basePosts.filter(p=>p.tanggal>=tblFrom&&p.tanggal<=tblTo);
-  }
-  // 'week' — paginated by 7-day windows, newest first
-  const sorted=[...basePosts].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
-  if(!sorted.length) return [];
-  const newestDate=sorted[0].tanggal;
-  const endDate=new Date(newestDate+'T00:00:00');
-  endDate.setDate(endDate.getDate()-(tblPage*TBL_PAGE_DAYS));
-  const startDate=new Date(endDate);
-  startDate.setDate(startDate.getDate()-(TBL_PAGE_DAYS-1));
-  const endStr=endDate.toISOString().split('T')[0];
-  const startStr=startDate.toISOString().split('T')[0];
-  return basePosts.filter(p=>p.tanggal>=startStr&&p.tanggal<=endStr);
+  const dateFiltered=getTblDateFiltered(basePosts);
+  const start=tblPage*TBL_PAGE_SIZE;
+  return dateFiltered.slice(start, start+TBL_PAGE_SIZE);
 }
 
 function getTblTotalPages(basePosts){
-  const sorted=[...basePosts].sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
-  if(!sorted.length) return 1;
-  const newestDate=sorted[0].tanggal;
-  const oldestDate=sorted[sorted.length-1].tanggal;
-  const diffDays=Math.ceil((new Date(newestDate+'T00:00:00')-new Date(oldestDate+'T00:00:00'))/(1000*60*60*24))+1;
-  return Math.max(1,Math.ceil(diffDays/TBL_PAGE_DAYS));
+  const dateFiltered=getTblDateFiltered(basePosts);
+  return Math.max(1,Math.ceil(dateFiltered.length/TBL_PAGE_SIZE));
 }
 
 function extractPrefix(kode){
@@ -304,14 +289,18 @@ function incompleteHints(r){
 function renderPagination(basePosts){
   const pg=document.getElementById('tbl-pagination');
   if(!pg) return;
-  // Only show pagination in 'week' mode
-  if(tblFilter!=='week'){pg.innerHTML='';return;}
   const total=getTblTotalPages(basePosts);
   if(total<=1){pg.innerHTML='';return;}
+  // Show max 7 page buttons around current page
+  const range=3;
   let html=`<div class="pg-wrap">`;
   html+=`<button class="pg-btn" onclick="tblPageGo(${tblPage-1})" ${tblPage===0?'disabled':''}>‹</button>`;
   for(let i=0;i<total;i++){
-    html+=`<button class="pg-btn ${i===tblPage?'pg-active':''}" onclick="tblPageGo(${i})">${i+1}</button>`;
+    if(i===0||i===total-1||Math.abs(i-tblPage)<=range){
+      if(i>0&&i<tblPage-range) {html+=`<span class="pg-ellipsis">…</span>`;i=tblPage-range-1;continue;}
+      if(i<total-1&&i>tblPage+range) {html+=`<span class="pg-ellipsis">…</span>`;break;}
+      html+=`<button class="pg-btn ${i===tblPage?'pg-active':''}" onclick="tblPageGo(${i})">${i+1}</button>`;
+    }
   }
   html+=`<button class="pg-btn" onclick="tblPageGo(${tblPage+1})" ${tblPage>=total-1?'disabled':''}>›</button>`;
   html+=`</div>`;
@@ -319,7 +308,8 @@ function renderPagination(basePosts){
 }
 
 function tblPageGo(page){
-  const total=getTblTotalPages(activePrefix==='all'?getFilteredPosts():getFilteredPosts().filter(p=>extractPrefix(p.kode_video)===activePrefix));
+  const prefixed=activePrefix==='all'?getFilteredPosts():getFilteredPosts().filter(p=>extractPrefix(p.kode_video)===activePrefix);
+  const total=getTblTotalPages(prefixed);
   if(page<0||page>=total) return;
   tblPage=page;
   applyDisplay();
