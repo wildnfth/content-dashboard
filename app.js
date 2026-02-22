@@ -422,7 +422,10 @@ document.getElementById('m-save').addEventListener('click',async()=>{
   btn.disabled=false;btn.textContent='Simpan ✨';
   if(error){showToast('Gagal menyimpan: '+error.message,'err');return;}
   showToast(editId?'Post berhasil diperbarui! ✨':'Post berhasil ditambahkan! 🎉');
-  closePost();loadAll();
+  closePost();
+  await loadAll();
+  // Scroll ke tabel agar post terbaru langsung terlihat
+  document.getElementById('tbody').closest('.tbl-card')?.scrollIntoView({behavior:'smooth',block:'start'});
 });
 
 
