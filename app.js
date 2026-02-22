@@ -29,7 +29,7 @@ dbg('✅ Supabase client dibuat', {url: SUPABASE_URL.slice(0,30)+'...'});
 // UTILS
 const p2=n=>String(n).padStart(2,'0');
 const nowTime=()=>{const d=new Date();return`${p2(d.getHours())}:${p2(d.getMinutes())}`;};
-const todayStr=()=>new Date().toISOString().split('T')[0];
+const todayStr=()=>{const d=new Date();return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;};
 function fmtV(n){if(n==null||n===''||isNaN(n))return'—';n=parseInt(n);if(n>=1000000)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString('id-ID');}
 function fmtD(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
 function ensureUrl(v){
@@ -536,7 +536,7 @@ document.querySelectorAll('.fp').forEach(btn=>{
       // Set default: last 30 days
       if(!customFrom){
         const d=new Date(); d.setDate(d.getDate()-29);
-        document.getElementById('f-dari').value=d.toISOString().split('T')[0];
+        document.getElementById('f-dari').value=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
         document.getElementById('f-sampai').value=todayStr();
         customFrom=document.getElementById('f-dari').value;
         customTo=document.getElementById('f-sampai').value;
