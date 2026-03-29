@@ -1,0 +1,162 @@
+.page {
+  display: grid;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+.filters,
+.metrics,
+.chartCard,
+.heroChart {
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-lg) + 0.15rem);
+  background: var(--surface-base);
+  box-shadow: var(--shadow-soft);
+}
+
+.eyebrow {
+  margin: 0 0 0.18rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+
+.chartHeader h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  line-height: 1.02;
+}
+
+.filters,
+.metrics {
+  padding: var(--panel-pad);
+}
+
+.pillRow,
+.rangeRow {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 0.58rem 0.84rem;
+  font-size: 0.77rem;
+  font-weight: 600;
+}
+
+.pill:hover {
+  border-color: color-mix(in oklab, var(--rose) 28%, white);
+}
+
+.pillActive {
+  color: var(--wine);
+  border-color: color-mix(in oklab, var(--rose) 28%, white);
+  background: var(--surface-highlight);
+}
+
+.pill:active {
+  transform: scale(0.98);
+}
+
+.rangeRow {
+  margin-top: 0.72rem;
+}
+
+.rangeRow input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 1rem;
+  padding: 0.82rem 0.92rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.rangeRow input:hover {
+  border-color: color-mix(in oklab, var(--rose) 24%, white);
+}
+
+.metrics {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.metrics article {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in oklab, var(--gold) 10%, white);
+  background: var(--surface-warm);
+}
+
+.metrics article span,
+.metrics article small {
+  color: var(--ink-soft);
+}
+
+.metrics strong {
+  font-size: clamp(1.7rem, 6vw, 2.2rem);
+  line-height: 1;
+}
+
+.chartGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.heroChart,
+.chartCard {
+  padding: var(--panel-pad);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.9rem;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.chartHeader span {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chartFrame {
+  height: 16.8rem;
+}
+
+.feedback {
+  padding: 1.05rem;
+  border-radius: 1.35rem;
+  border: 1px dashed var(--line-strong);
+  background: var(--surface-tint);
+}
+
+@media (min-width: 900px) {
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .chartGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroChart,
+  .fullWidth {
+    grid-column: 1 / -1;
+  }
+
+  .chartFrame {
+    height: 21rem;
+  }
+}

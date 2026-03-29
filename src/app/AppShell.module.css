@@ -1,0 +1,112 @@
+.shell {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: max(0.9rem, env(safe-area-inset-top)) 1rem 0.8rem;
+  backdrop-filter: blur(20px) saturate(1.08);
+  background: color-mix(in oklab, var(--canvas) 88%, white);
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 72%, transparent);
+}
+
+.brandTitle {
+  margin: 0;
+  font: 600 clamp(1.08rem, 2vw, 1.36rem) / 1 var(--font-display);
+  letter-spacing: 0.025em;
+}
+
+.logout {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid color-mix(in oklab, var(--line) 84%, transparent);
+  background: var(--surface-base);
+  color: var(--wine);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  padding: 0.55rem;
+  box-shadow: 0 10px 24px rgba(93, 43, 66, 0.08);
+}
+
+.logout svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.logout:hover {
+  border-color: color-mix(in oklab, var(--rose) 28%, white);
+  background: var(--surface-soft);
+}
+
+.main {
+  width: min(1200px, calc(100% - 1.25rem));
+  margin: 0 auto;
+  padding: 0.95rem 0 1.6rem;
+}
+
+.bottomNav {
+  position: fixed;
+  left: 50%;
+  bottom: calc(0.82rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 45;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem;
+  width: min(26rem, calc(100% - 1rem));
+  padding: 0.42rem;
+  border-radius: 1.45rem;
+  background: color-mix(in oklab, var(--paper) 86%, white);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px) saturate(1.1);
+}
+
+.bottomLink {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  border-radius: 999px;
+  min-height: var(--touch-target);
+  padding: 0.85rem 1rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.bottomLinkActive {
+  background: color-mix(in oklab, var(--rose) 16%, white);
+  color: var(--wine);
+  box-shadow: 0 10px 24px rgba(93, 43, 66, 0.12);
+}
+
+.bottomLink:active,
+.logout:active {
+  transform: scale(0.97);
+}
+
+.bottomLink:hover {
+  background: var(--surface-soft);
+  color: var(--wine);
+}
+
+@media (min-width: 900px) {
+  .header {
+    padding: 1.15rem 1.5rem 1rem;
+  }
+
+  .main {
+    width: min(1200px, calc(100% - 2.5rem));
+    padding-top: 1.1rem;
+  }
+}
