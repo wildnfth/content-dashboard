@@ -1,7 +1,7 @@
 import type { Post, PostInput } from '@/types/post'
 import type { PostsService } from '@/services/posts'
 
-import { supabaseClient } from './supabase'
+import { requireSupabaseClient } from './supabase'
 
 function normalizePost(row: Record<string, unknown>): Post {
   return {
@@ -20,6 +20,7 @@ function normalizePost(row: Record<string, unknown>): Post {
 }
 
 async function list() {
+  const supabaseClient = requireSupabaseClient()
   const { data, error } = await supabaseClient
     .from('posts')
     .select('*')
@@ -34,6 +35,7 @@ async function list() {
 }
 
 async function create(post: PostInput) {
+  const supabaseClient = requireSupabaseClient()
   const { error } = await supabaseClient.from('posts').insert(post)
 
   if (error) {
@@ -42,6 +44,7 @@ async function create(post: PostInput) {
 }
 
 async function update(id: string, post: PostInput) {
+  const supabaseClient = requireSupabaseClient()
   const { error } = await supabaseClient.from('posts').update(post).eq('id', id)
 
   if (error) {
@@ -50,6 +53,7 @@ async function update(id: string, post: PostInput) {
 }
 
 async function remove(id: string) {
+  const supabaseClient = requireSupabaseClient()
   const { error } = await supabaseClient.from('posts').delete().eq('id', id)
 
   if (error) {
@@ -58,6 +62,7 @@ async function remove(id: string) {
 }
 
 async function getHighestNomorByDate(tanggal: string, excludeId?: string) {
+  const supabaseClient = requireSupabaseClient()
   let query = supabaseClient
     .from('posts')
     .select('nomor')

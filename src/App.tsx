@@ -20,6 +20,16 @@ const InsightScreen = lazy(async () => ({
 function App() {
   const auth = useAuthSession()
 
+  if (auth.status === 'error') {
+    return (
+      <div className="app-loading app-loading--error">
+        <div className="app-loading__seal">LM</div>
+        <p>Dashboard belum bisa dibuka.</p>
+        <small>{auth.error ?? 'Terjadi masalah saat menyiapkan autentikasi.'}</small>
+      </div>
+    )
+  }
+
   if (auth.status === 'loading') {
     return (
       <div className="app-loading">

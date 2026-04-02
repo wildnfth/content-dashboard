@@ -6,6 +6,7 @@ import { LoginScreen } from './LoginScreen'
 const signInWithPasswordMock = vi.fn()
 
 vi.mock('@/services/supabase', () => ({
+  supabaseConfigError: null,
   supabaseClient: {
     auth: {
       signInWithPassword: (...args: unknown[]) => signInWithPasswordMock(...args),

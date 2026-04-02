@@ -9,8 +9,6 @@ import { initializeAuthStore } from '@/services/auth-store'
 import './index.css'
 import App from './App.tsx'
 
-await initializeAuthStore()
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={appQueryClient}>
@@ -20,3 +18,5 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 )
+
+void initializeAuthStore()

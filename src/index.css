@@ -118,6 +118,20 @@ select:focus-visible {
   padding: 2rem;
 }
 
+.app-loading p,
+.app-loading small {
+  margin: 0;
+}
+
+.app-loading small {
+  max-width: 32rem;
+  color: var(--ink-soft);
+}
+
+.app-loading--error {
+  gap: 0.6rem;
+}
+
 /* Lock vertical page scrolling when login screen is active (mobile-safe). */
 body[data-scroll-locked='true'],
 body:has([data-screen='login']) {

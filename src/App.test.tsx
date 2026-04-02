@@ -48,10 +48,24 @@ function renderApp(initialEntry: string) {
 }
 
 describe('App routing', () => {
+  it('shows startup error when auth initialization fails', async () => {
+    useAuthSessionMock.mockReturnValue({
+      status: 'error',
+      session: null,
+      error: 'Supabase environment variables are missing.',
+    })
+
+    renderApp('/')
+
+    expect(await screen.findByText('Dashboard belum bisa dibuka.')).toBeInTheDocument()
+    expect(screen.getByText('Supabase environment variables are missing.')).toBeInTheDocument()
+  })
+
   it('redirects guests away from protected routes', async () => {
     useAuthSessionMock.mockReturnValue({
       status: 'ready',
       session: null,
+      error: null,
     })
 
     renderApp('/app/operasional')
@@ -63,6 +77,7 @@ describe('App routing', () => {
     useAuthSessionMock.mockReturnValue({
       status: 'ready',
       session: { user: { email: 'lia@proton.me', user_metadata: {} } },
+      error: null,
     })
 
     renderApp('/login')

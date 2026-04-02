@@ -13,7 +13,7 @@ export function AppShell() {
         <button
           type="button"
           className={styles.logout}
-          onClick={() => supabaseClient.auth.signOut()}
+          onClick={() => void supabaseClient?.auth.signOut()}
           aria-label="Keluar"
           title="Keluar"
         >

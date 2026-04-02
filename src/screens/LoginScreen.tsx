@@ -5,7 +5,7 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { focusNextFieldOrSubmit } from '@/lib/focus'
 import { useBodyScrollLockRef } from '@/hooks/useBodyScrollLock'
 import { usernameToEmail } from '@/lib/formatters'
-import { supabaseClient } from '@/services/supabase'
+import { supabaseClient, supabaseConfigError } from '@/services/supabase'
 
 import styles from './LoginScreen.module.css'
 
@@ -20,6 +20,11 @@ export function LoginScreen() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
+
+    if (supabaseConfigError || !supabaseClient) {
+      setErrorMessage(supabaseConfigError ?? 'Konfigurasi Supabase belum siap.')
+      return
+    }
 
     if (!username.trim() || !password) {
       setErrorMessage('Username dan password wajib diisi.')
